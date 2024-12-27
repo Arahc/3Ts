@@ -13,3 +13,6 @@ class WindowSettings():
     height = 720
     title = "demo"
     fps = 60
+
+class BgmSettings():
+    defaultvolume = 0.5

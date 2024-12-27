@@ -1,8 +1,7 @@
 import pygame
 import sys
 from GameSettings import *
-from GameManager import Scene
-from SettingPage import SettingPage
+from Utility import Scene
 
 class Menu(Scene):
 
@@ -10,8 +9,8 @@ class Menu(Scene):
         pass
     
     def show(self, window):
-        font = pygame.font.Font(None, 36)
         window.fill(WHITE)
+        font = pygame.font.Font(None, 36)
         
         self.StartButton = font.render('Start', True, BLACK)
         self.SettingButton = font.render('Settings', True, BLACK)
