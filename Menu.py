@@ -1,38 +1,52 @@
 import pygame
 import sys
-from GameManager import Listener
-from Settings import *
+from GameSettings import *
+from GameManager import Scene
+from SettingPage import SettingPage
 
-class Menu(Listener):
+class Menu(Scene):
 
     def __init__(self, window):
+        pass
+    
+    def show(self, window):
         font = pygame.font.Font(None, 36)
         window.fill(WHITE)
         
         self.StartButton = font.render('Start', True, BLACK)
+        self.SettingButton = font.render('Settings', True, BLACK)
+        self.HelpButton = font.render('Help', True, BLACK)
         self.QuitButton = font.render('Quit', True, BLACK)
         
-        StartRect = self.StartButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 - 50))
-        QuitRect = self.QuitButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 + 50))
+        StartRect = self.StartButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 - 120))
+        SettingRect = self.SettingButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 - 40))
+        HelpRect = self.HelpButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 + 40))
+        QuitRect = self.QuitButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 + 120))
         
         window.blit(self.StartButton, StartRect)
+        window.blit(self.SettingButton, SettingRect)
+        window.blit(self.HelpButton, HelpRect)
         window.blit(self.QuitButton, QuitRect)
-        
-    
+
     def handle(self, event):
         if (event.type == pygame.MOUSEBUTTONDOWN):
             mouse_x, mouse_y = event.pos
-            self.check_mouse_click(mouse_x, mouse_y)
+            return self.check_mouse_click(mouse_x, mouse_y)
 
     # 检查鼠标点击
     def check_mouse_click(self, x, y):
-        StartRect = self.StartButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 - 50))
-        QuitRect = self.QuitButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 + 50))
+        StartRect = self.StartButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 - 120))
+        SettingRect = self.SettingButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 - 40))
+        HelpRect = self.HelpButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 + 40))
+        QuitRect = self.QuitButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 + 120))
         
         if StartRect.collidepoint(x, y):
-            print("开始游戏被选中")
-            # 这里可以添加开始游戏的代码
+            return 'EnterGame'
+        elif SettingRect.collidepoint(x, y):
+            return 'EnterSetting'
+        elif HelpRect.collidepoint(x, y):
+            return 'EnterHelp'
         elif QuitRect.collidepoint(x, y):
-            print("退出游戏被选中")
+            print("See you next time!")
             pygame.quit()
             sys.exit()
