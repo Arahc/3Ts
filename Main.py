@@ -1,8 +1,7 @@
 import pygame
 import sys
-from Settings import *
+from GameSettings import *
 from GameManager import GameManager
-
 
 def main():
     global manager
@@ -13,7 +12,7 @@ def main():
     while True:
         manager.update()
         manager.render()
-
+        pygame.time.Clock().tick(30)
 
 if __name__ == "__main__":
     main()
