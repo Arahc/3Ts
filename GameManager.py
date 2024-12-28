@@ -1,50 +1,26 @@
-import pygame
-import sys
+import pygame, sys, Menu
+from GameSettings import *
+from SettingPage import SettingPage
+from Utility import BgmPlayer, Scene
 
+class GameManager():
 
-class Listener:
-    def __init__(self):
-        pass
-
-    def handle(self, event):
-        pass
-
-    def post(self):
-        pass
-
-
-class Entity(Listener):
-    def __init__(self):
-        pass
-
-    def handle(self, event):
-        pass
-
-    def render(self):
-        pass
-
-
-import Menu
-from Settings import *
-from BgmPlayer import BgmPlayer
-
-
-class GameManager:
-
-    global events, listeners
 
     def __init__(self, window):
         global events, listeners
         self.window = window
         self.clock = pygame.time.Clock()
-        menu = Menu.Menu(window)
-        listeners = [menu]
+        self.menu = Menu.Menu(window)
+        self.bgmplayer = BgmPlayer()
+        self.settingpage = SettingPage(self.bgmplayer)
+        listeners = [ self.menu ]
         events = []
-
+        
     def AddEvent(self, event):
         events.append(event)
 
     def update(self):
+        global events, listeners
         loadevents = pygame.event.get()
         for event in loadevents:
             if event.type == pygame.QUIT:
@@ -53,10 +29,26 @@ class GameManager:
             else:
                 self.AddEvent(event)
 
+        # show scenes
+        for listener in listeners:
+            if (isinstance(listener, Scene)):
+                listener.show(self.window)
+        
+        # handle events
         while len(events) > 0:
             event = events.pop(0)
             for listener in listeners:
-                listener.handle(event)
+                value = listener.handle(event)
+                if value != None:
+                    if value == 'EnterGame':
+                        print("EnterGame")
+                    elif value == 'EnterSetting':
+                        print("EnterSetting")
+                        listeners = [ self.settingpage ]
+                    elif value == 'EnterHelp':
+                        print("EnterHelp")
+                    elif value == 'QuitSetting':
+                        listeners = [ self.menu ]
 
     def render(self):
         pygame.display.flip()
