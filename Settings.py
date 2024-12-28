@@ -9,7 +9,14 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 class WindowSettings():
-    width = 1280
-    height = 720
+    width = 1000
+    height = 650
     title = "demo"
     fps = 60
+    playerHeight = 70 # 人物高度
+    playerWidth = 35 # 人物宽度
+    speed = 6 # 人物移动速度
+    gravity = 900 # 重力加速度
+    initialSpeed = 600 # 起跳初速度
+    blockSize = 50 # 地图方块大小
+    edgeDist = 4 * blockSize # 人物实际活动范围距离左右边界的距离（超过这个距离，就变成地图移动，人物不动）
