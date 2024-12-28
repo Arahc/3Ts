@@ -1,7 +1,11 @@
+'''
+这是地图移动的主函数
+'''
+
 import pygame
 import sys
 import Map
-from Settings import *
+from GameSettings import *
 import Move
 
 pygame.init()

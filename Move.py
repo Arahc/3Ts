@@ -1,7 +1,14 @@
+'''
+移动相关的库
+人物和地图的左右移动（跟随镜头）
+人物的跳跃（重力加速度）
+与地图块的碰撞检测
+'''
+
 import pygame
 import sys
 import Map
-from Settings import *
+from GameSettings import *
 
 '''
 初始化

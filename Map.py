@@ -9,7 +9,7 @@ row, col 的顺序和 pygame 坐标系顺序一样
 """
 
 import random
-from Settings import *
+from GameSettings import *
 
 row = WindowSettings.height // WindowSettings.blockSize
 col = WindowSettings.width // WindowSettings.blockSize
