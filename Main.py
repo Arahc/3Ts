@@ -12,7 +12,7 @@ def main():
     while True:
         manager.update()
         manager.render()
-        pygame.time.Clock().tick(30)
+        pygame.time.Clock().tick(WindowSettings.fps)
 
 if __name__ == "__main__":
     main()

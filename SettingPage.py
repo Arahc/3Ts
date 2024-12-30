@@ -49,7 +49,7 @@ class SettingPage(Scene):
                 print("volume: ", self.volume)
                 return None
             elif (self.QuitRect.collidepoint(mouse_x,mouse_y)):
-                return 'QuitSetting'
+                return 'EnterMenu'
                 
     
     def draw_volume_bar(self, window, volume):

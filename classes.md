@@ -27,4 +27,12 @@
 
 - 父类：`Listeners`
 
-- 方法：`handle` `check_mouse_click` 
+- 方法：`handle` `check_mouse_click` `show`
+
+### MapPage
+
+地图场景
+
+- 父类：`Scene`
+
+- 方法：`handle` （处理场景的转换） `show` 
