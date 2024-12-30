@@ -22,12 +22,13 @@ class SettingPage(Scene):
 
         self.volume_bar_pos = int(self.volume_bar_width * self.volume)
         self.draw_volume_bar(window, self.volume)
-
-        font = pygame.font.Font(None, 36)
-        self.VolumeButton = font.render('Quit', True, BLACK)
+        
+        font = pygame.font.Font(FontSettings.FontPath, 36)
+        self.VolumeButton = font.render('音量', True, BLACK)
         self.VolumeRect = self.VolumeButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 - 80))
-        self.QuitButton = font.render('Quit', True, BLACK)
+        self.QuitButton = font.render('返回', True, BLACK)
         self.QuitRect = self.QuitButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 + 40))
+        window.blit(self.VolumeButton, self.VolumeRect)
         window.blit(self.QuitButton, self.QuitRect)
 
     def handle(self, event):

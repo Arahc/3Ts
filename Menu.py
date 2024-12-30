@@ -10,12 +10,12 @@ class Menu(Scene):
     
     def show(self, window):
         window.fill(WHITE)
-        font = pygame.font.Font(None, 36)
+        font = pygame.font.Font(FontSettings.FontPath, 36)
         
-        self.StartButton = font.render('Start', True, BLACK)
-        self.SettingButton = font.render('Settings', True, BLACK)
-        self.HelpButton = font.render('Help', True, BLACK)
-        self.QuitButton = font.render('Quit', True, BLACK)
+        self.StartButton = font.render('开始游戏', True, BLACK)
+        self.SettingButton = font.render('设置', True, BLACK)
+        self.HelpButton = font.render('帮助', True, BLACK)
+        self.QuitButton = font.render('退出游戏', True, BLACK)
         
         StartRect = self.StartButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 - 120))
         SettingRect = self.SettingButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 - 40))

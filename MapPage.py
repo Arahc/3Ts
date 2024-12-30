@@ -98,7 +98,7 @@ class MapPage(Scene):
                 self.frame = 0
             else:
                 self.frame = (self.frame + 1) % 4
-        if keys[pygame.K_w] and self.touchDown():
+        if keys[pygame.K_SPACE] and self.touchDown():
             self.jumpTime = pygame.time.get_ticks()
             self.tryMoveY(-1)
             self.deltaY = 0
@@ -175,7 +175,7 @@ class MapPage(Scene):
             elif self.playerRect.x <= self.edgeDist and dx < 0 and self.mapDelta != 0:
                 self.moveMap(1)
                 if self.touchSide():
-                    self.oveMap(-1)
+                    self.moveMap(-1)
             else:
                 self.playerRect.x += sgnx
                 if self.touchSide() or self.playerRect.x < 0:
