@@ -40,7 +40,7 @@ class Menu(Scene):
         QuitRect = self.QuitButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 + 120))
         
         if StartRect.collidepoint(x, y):
-            return 'EnterGame'
+            return 'EnterMap'
         elif SettingRect.collidepoint(x, y):
             return 'EnterSetting'
         elif HelpRect.collidepoint(x, y):

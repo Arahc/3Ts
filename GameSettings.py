@@ -12,14 +12,16 @@ class WindowSettings():
     width = 1000
     height = 650
     title = "demo"
-    fps = 60
-    playerHeight = 70 # 人物高度
-    playerWidth = 35 # 人物宽度
-    speed = 6 # 人物移动速度
-    gravity = 900 # 重力加速度
-    initialSpeed = 600 # 起跳初速度
-    blockSize = 50 # 地图方块大小
-    edgeDist = 4 * blockSize # 人物实际活动范围距离左右边界的距离（超过这个距离，就变成地图移动，人物不动）
+    fps = 120
+
+class MoveSettings():
+    playerHeight = 70 # 浜虹墿楂樺害
+    playerWidth = 35 # 浜虹墿瀹藉害
+    speed = 6 # 浜虹墿绉诲姩閫熷害
+    gravity = 900 # 閲嶅姏鍔犻�熷害
+    initialSpeed = 600 # 璧疯烦鍒濋�熷害
+    blockSize = 50 # 鍦板浘鏂瑰潡澶у皬
+    edgeDist = 4 * blockSize # 浜虹墿瀹為檯娲诲姩鑼冨洿璺濈宸﹀彸杈圭晫鐨勮窛绂伙紙瓒呰繃杩欎釜璺濈锛屽氨鍙樻垚鍦板浘绉诲姩锛屼汉鐗╀笉鍔級
 
 class BgmSettings():
     defaultvolume = 0.5

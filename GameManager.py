@@ -1,10 +1,10 @@
 import pygame, sys, Menu
 from GameSettings import *
 from SettingPage import SettingPage
+from MapPage import MapPage
 from Utility import BgmPlayer, Scene
 
 class GameManager():
-
 
     def __init__(self, window):
         global events, listeners
@@ -13,6 +13,7 @@ class GameManager():
         self.menu = Menu.Menu(window)
         self.bgmplayer = BgmPlayer()
         self.settingpage = SettingPage(self.bgmplayer)
+        self.mappage = MapPage()
         listeners = [ self.menu ]
         events = []
         
@@ -29,25 +30,30 @@ class GameManager():
             else:
                 self.AddEvent(event)
 
-        # show scenes
         for listener in listeners:
+            # show scenes
             if (isinstance(listener, Scene)):
                 listener.show(self.window)
-        
+            
+            # deal with scenes
+            if (isinstance(listener, MapPage)):
+                listener.move()
+
         # handle events
         while len(events) > 0:
             event = events.pop(0)
             for listener in listeners:
                 value = listener.handle(event)
                 if value != None:
-                    if value == 'EnterGame':
-                        print("EnterGame")
+                    if value == 'EnterMap':
+                        print("EnterMap")
+                        listeners=[ self.mappage ]
                     elif value == 'EnterSetting':
                         print("EnterSetting")
                         listeners = [ self.settingpage ]
                     elif value == 'EnterHelp':
                         print("EnterHelp")
-                    elif value == 'QuitSetting':
+                    elif value == 'EnterMenu':
                         listeners = [ self.menu ]
 
     def render(self):
