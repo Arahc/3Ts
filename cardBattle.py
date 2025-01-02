@@ -38,9 +38,9 @@ class Card:
     def __str__(self):
         return self.title
 
-TrashCard = Card(ID=-1, title="Trash Card", description="A card that will not appear, set as a null card", gate="None", type=True, level=0, effects=[], imgLocation="./battle_assets/card/-1.png")
+TrashCard = Card(ID=-1, title="Trash Card", description="A card that will not appear, set as a null card", gate="None", type=True, level=0, effects=[], imgLocation="./assets/card/-1.png")
 
-def cardAttack(gate:str, card1:Card, card2=TrashCard)->Card:
+def cardAttack(gate:str, card0:Card, card1:Card, card2:Card=TrashCard)->Card:
     """
     Use the gate of self to attack the cards
     gate: The gate of the card that is attacking.
@@ -49,7 +49,9 @@ def cardAttack(gate:str, card1:Card, card2=TrashCard)->Card:
         with the effects of the card being applied to the new card (except for fragile effects).
     The level of the new card will be the sum of the levels of the two cards.
     """
-    resultCard = Card(ID=0, title='operated card', description='operated card', gate='None', type=True, level=0, effects=[])
+    if card0.gate != gate:
+        raise ValueError("Invalid operation: the gate of the card is not the same as the gate of the operation")
+    resultCard = Card(ID=0, title='operated card', description='operated card', gate='None', type=True, level=0, effects=[], imgLocation='./assets/card/res.png')
     if gate == 'not':
         if card2 != TrashCard:
             raise ValueError("Invalid operation: 'not' gate operates on one card")
@@ -115,6 +117,10 @@ class Character:
         self.imgLocation = imgLocation
         self.maxHP = maxHP
         self.maxSP = maxSP
+        self.onHandCards = cards
+        self.usedCards = []
+        self.unusedCards = []
+        self.useThisTurn = []
     def __str__(self):
         return self.name
     def initCharacter(self)->list:
@@ -153,20 +159,19 @@ class Character:
             self.unusedCards.remove(card)
         self.onHandCards += newCards
         return newCards
-    def useCards(self, cards:list)->None:
+    def useCards(self, card:Card)->None:
         """
-        Use a list of cards.
-        If the size of the list > nowSP+1, nowSP -= (size - nowSP - 1).
+        Use a card.
         If the card has effect "When used ..." [time='use'], apply the effect.
         """
-        if len(cards) > self.nowSP+1:
-            self.nowSP -= (len(cards) - self.nowSP - 1)
-        for card in cards:
-            for effect in card.effects:
-                if effect.time == 'use':
-                    pass # TODO <------------------------------------------------------------------------------------------ apply the effect
-            try:
-                self.onHandCards.remove(card)
-            except ValueError:
-                raise ValueError("Invalid card: the card is not on hand")
-            self.usedCards.append(card)
+        for effect in card.effects:
+            if effect.time == 'use':
+                pass # TODO <------------------------------------------------------------------------------------------ apply the effect
+        try:
+            self.onHandCards.remove(card)
+        except ValueError:
+            raise ValueError("Invalid card: the card is not on hand")
+        self.usedCards.append(card)
+        self.useThisTurn.append(card)
+        if self.SP - len(self.useThisTurn) < 0:
+            raise ValueError("Invalid SP: the SP of the character is negative")

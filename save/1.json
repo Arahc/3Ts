@@ -4,8 +4,8 @@
             "Height":650,
             "Width":1000
         },
-        "Background":"./battle_assets/bg_img.png",
-        "fps":120
+        "Background":"./assets/bg_img.png",
+        "fps":40
     },
     "Characters":{
         "friendUnit":[
@@ -18,19 +18,19 @@
                 "maxSP":10,
                 "cards":[
                     {
-                        "ID":1,
-                        "title":"创作者之卡(1)",
-                        "description":"Arahc 即是强大本身，你无法驾驭",
-                        "gate":"and",
+                        "ID":0,
+                        "title":"WorldEnder",
+                        "description":" 魔 王 ",
+                        "gate":"not",
                         "type":"True",
-                        "level":2147483647,
+                        "level":616,
                         "effects":[
 
                         ],
-                        "imgLocation":"./battle_assets/card/1.png"
+                        "imgLocation":"./assets/card/0.png"
                     }
                 ],
-                "imgLocation":"./battle_assets/char/1.png"
+                "imgLocation":"./assets/char/1.png"
             }
         ],
         "enemyUnit":[
@@ -43,6 +43,30 @@
                 "maxSP":2147483647,
                 "cards":[
                     {
+                        "ID":1,
+                        "title":"创作者之卡(1)",
+                        "description":"Arahc 即是强大本身，你无法驾驭",
+                        "gate":"and",
+                        "type":"True",
+                        "level":2147483647,
+                        "effects":[
+
+                        ],
+                        "imgLocation":"./assets/card/1.png"
+                    },
+                    {
+                        "ID":0,
+                        "title":"WorldEnder",
+                        "description":" 魔 王 ",
+                        "gate":"not",
+                        "type":"False",
+                        "level":616,
+                        "effects":[
+
+                        ],
+                        "imgLocation":"./assets/card/0.png"
+                    },
+                    {
                         "ID":0,
                         "title":"WorldEnder",
                         "description":" 魔 王 ",
@@ -52,10 +76,10 @@
                         "effects":[
 
                         ],
-                        "imgLocation":"./battle_assets/card/0.png"
+                        "imgLocation":"./assets/card/0.png"
                     }
                 ],
-                "imgLocation":"./battle_assets/char/0.png"
+                "imgLocation":"./assets/char/0.png"
             }
         ]
     }
