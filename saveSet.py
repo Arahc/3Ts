@@ -39,6 +39,7 @@ def readSettings(location="./save/1.json", willModify=False):
         name=friendUnitData['name'],
         HP=friendUnitData['HP'],
         SP=friendUnitData['SP'],
+        SPHeal=friendUnitData['SPHeal'],
         maxHP=friendUnitData['maxHP'],
         maxSP=friendUnitData['maxSP'],
         cards=[create_card(card) for card in friendUnitData['cards']],
@@ -52,6 +53,7 @@ def readSettings(location="./save/1.json", willModify=False):
         maxHP=enemyUnitData['maxHP'],
         maxSP=enemyUnitData['maxSP'],
         SP=enemyUnitData['SP'],
+        SPHeal=enemyUnitData['SPHeal'],
         cards=[create_card(card) for card in enemyUnitData['cards']],
         imgLocation=enemyUnitData['imgLocation']
     )

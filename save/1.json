@@ -4,7 +4,7 @@
             "Height":650,
             "Width":1000
         },
-        "Background":"./assets/bg_img.png",
+        "Background":"./assets/img/bg_img.png",
         "fps":40
     },
     "Characters":{
@@ -15,6 +15,7 @@
                 "HP":20,
                 "maxHP":35,
                 "SP":7,
+                "SPHeal":2,
                 "maxSP":10,
                 "cards":[
                     {
@@ -40,6 +41,7 @@
                 "HP":2147483647,
                 "maxHP":2147483647,
                 "SP":2147483647,
+                "SPHeal":2147483647,
                 "maxSP":2147483647,
                 "cards":[
                     {

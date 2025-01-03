@@ -64,7 +64,7 @@ def cardAttack(gate:str, card0:Card, card1:Card, card2:Card=TrashCard)->Card:
         if card2 == TrashCard:
             raise ValueError("Invalid operation: 'and' gate operates on two cards")
         resultCard.type = card1.type and card2.type
-        resultCard.level = card1.level + card2.level
+        resultCard.level = (card1.level + card2.level) // 2
         for effect in card1.effects:
             if not effect.fragile:
                 resultCard.effects.append(effect)
@@ -75,7 +75,7 @@ def cardAttack(gate:str, card0:Card, card1:Card, card2:Card=TrashCard)->Card:
         if card2 == TrashCard:
             raise ValueError("Invalid operation: 'or' gate operates on two cards")
         resultCard.type = card1.type or card2.type
-        resultCard.level = card1.level + card2.level
+        resultCard.level = (card1.level + card2.level) // 2
         for effect in card1.effects:
             if not effect.fragile:
                 resultCard.effects.append(effect)
@@ -86,7 +86,7 @@ def cardAttack(gate:str, card0:Card, card1:Card, card2:Card=TrashCard)->Card:
         if card2 == TrashCard:
             raise ValueError("Invalid operation: 'xor' gate operates on two cards")
         resultCard.type = card1.type != card2.type
-        resultCard.level = card1.level + card2.level
+        resultCard.level = (card1.level + card2.level) // 2
         for effect in card1.effects:
             if not effect.fragile:
                 resultCard.effects.append(effect)
@@ -100,7 +100,7 @@ def cardAttack(gate:str, card0:Card, card1:Card, card2:Card=TrashCard)->Card:
 import random
 
 class Character:
-    def __init__(self, ID:int, name:str, HP:int, SP:int, maxHP:int, maxSP:int, cards:list, imgLocation:str):
+    def __init__(self, ID:int, name:str, HP:int, SP:int, SPHeal:int, maxHP:int, maxSP:int, cards:list, imgLocation:str):
         """
         ID: The id of the character. Unique for each character.
         name: The name of the character.
@@ -113,6 +113,7 @@ class Character:
         self.name = name
         self.HP = HP
         self.SP = SP
+        self.SPHeal = SPHeal
         self.cards = cards
         self.imgLocation = imgLocation
         self.maxHP = maxHP
@@ -121,6 +122,8 @@ class Character:
         self.usedCards = []
         self.unusedCards = []
         self.useThisTurn = []
+        self.lostThisTurn = []
+        self.getThisTurn = []
     def __str__(self):
         return self.name
     def initCharacter(self)->list:
@@ -129,37 +132,20 @@ class Character:
             Draw SP cards from the cards of the character.
         Initialize the HP and SP of the character.
         """
-        self.nowHP = self.HP
-        self.nowSP = self.SP
         self.usedCards = []
         self.onHandCards = random.choices(self.cards, k=self.SP)
         self.unusedCards = self.cards.copy()
         for card in self.onHandCards:
             self.unusedCards.remove(card)
         return self.onHandCards
-    def getCards(self)->Card:
+
+    def SPlossThisTurn(self)->int:
         """
-        Get nowSP cards from the character.
-        If the character has no cards left, shuffle the used cards and set them as the cards of the character.
+        Get the SP loss of the character this turn.
         """
-        number = self.nowSP
-        if len(self.unusedCards) + len(self.usedCards) < self.nowSP:
-            number = len(self.unusedCards) + len(self.usedCards)
-        if len(self.unusedCards) < number:
-            self.onHandCards += self.unusedCards
-            addCards = random.choices(self.usedCards, k=number-len(self.unusedCards))
-            for card in addCards:
-                self.usedCards.remove(card)
-                self.onHandCards.append(card)
-            self.unusedCards = self.usedCards
-            self.usedCards = []
-            number -= len(addCards)
-        newCards = random.choices(self.unusedCards, k=number)
-        for card in newCards:
-            self.unusedCards.remove(card)
-        self.onHandCards += newCards
-        return newCards
-    def useCards(self, card:Card)->None:
+        return len(self.useThisTurn) + len(self.getThisTurn)
+
+    def useCard(self, card:Card)->None:
         """
         Use a card.
         If the card has effect "When used ..." [time='use'], apply the effect.
@@ -175,3 +161,77 @@ class Character:
         self.useThisTurn.append(card)
         if self.SP - len(self.useThisTurn) < 0:
             raise ValueError("Invalid SP: the SP of the character is negative")
+    def lostCard(self, card:Card)->None:
+        """
+        Lost a card
+        If the card has effect "When lost ..." [time='lost'], apply the effect.
+        """
+        for effect in card.effects:
+            if effect.time == 'lost':
+                pass # TODO <------------------------------------------------------------------------------------------ apply the effect
+        try:
+            self.onHandCards.remove(card)
+        except ValueError:
+            raise ValueError("Invalid card: the card is not on hand")
+        self.usedCards.append(card)
+        self.lostThisTurn.append(card)
+    def getCard(self)->Card:
+        import random
+        """
+        Get a card.
+        If the card has effect "When get ..." [time='get'], apply the effect.
+        If the character has no cards left, shuffle the used cards and set them as the cards of the character.
+        If no used cards are left, return TrashCard.
+        """
+        if self.unusedCards == []:
+            self.unusedCards = self.usedCards
+            self.usedCards = []
+            if self.unusedCards == []:
+                return TrashCard
+        card = random.choice(self.unusedCards)
+        self.unusedCards.remove(card)
+        for effect in card.effects:
+            if effect.time == 'get':
+                pass # TODO <------------------------------------------------------------------------------------------ apply the effect
+        self.getThisTurn.append(card)
+        self.onHandCards.append(card)
+        return card
+
+def clashDealing(friendUnit:Character, enemyUnit:Character):
+    friendLevel = 0
+    for card in friendUnit.onHandCards:
+        friendLevel += card.level
+    enemyLevel = 0
+    for card in enemyUnit.onHandCards:
+        enemyLevel += card.level
+    
+    """
+    If draw, nothing happen.
+    If one character wins, cause damage to another character.
+    """
+    if friendLevel == enemyLevel:
+        pass
+    elif friendLevel < enemyLevel:
+        yin = 0
+        yang = 0
+        for card in enemyUnit.onHandCards:
+            if card.type:
+                yang += 1
+            else:
+                yin += 1
+        damage = max(yin, yang) * (enemyLevel - friendLevel)
+        friendUnit.HP -= damage
+        if friendUnit.HP < 0:
+            friendUnit.HP = 0
+    else:
+        yin = 0
+        yang = 0
+        for card in friendUnit.onHandCards:
+            if card.type:
+                yang += 1
+            else:
+                yin += 1
+        damage = max(yin, yang) * (enemyLevel - friendLevel)
+        enemyUnit.HP -= damage
+        if enemyUnit.HP < 0:
+            enemyUnit.HP = 0
