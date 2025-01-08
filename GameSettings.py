@@ -22,6 +22,8 @@ class MoveSettings():
     initialSpeed = 550 # 起跳初速度
     blockSize = 50 # 地图方块大小
     edgeDist = 4 * blockSize # 人物实际活动范围距离左右边界的距离（超过这个距离，就变成地图移动，人物不动）
+    dashSpeed = 16 # 冲刺速度
+    dashDuration = 200 # 冲刺持续时间 (ms)
 
 class BgmSettings():
     defaultvolume = 0.5

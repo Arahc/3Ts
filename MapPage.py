@@ -42,6 +42,15 @@ class MapPage(Scene):
             )
         self.player = self.rightImage[0]
         self.playerRect = self.player.get_rect()
+        self.playerdashL = pygame.image.load(r".\assets\character\left - dash.png")
+        self.playerdashL = pygame.transform.scale(
+            self.playerdashL, (self.playerWidth*1.6, self.playerHeight)
+        )
+        self.playerdashR = pygame.image.load(r".\assets\character\right - dash.png")
+        self.playerdashR = pygame.transform.scale(
+            self.playerdashR, (self.playerWidth*1.6, self.playerHeight)
+        )
+        
 
         # 设置地图&碰撞检测
         self.width = WindowSettings.width
@@ -98,6 +107,10 @@ class MapPage(Scene):
         self.deltaY = 0
         self.onJump = False
         self.falling = False
+        self.isDashing = False
+        self.Dashavailable = True  # 冲刺是否可用
+        self.dashSpeed = MoveSettings.dashSpeed  # 冲刺速度
+        self.dashTimer = 0  # 新增变量，用于记录冲刺时间
 
     """
     画地图&人物
@@ -108,7 +121,14 @@ class MapPage(Scene):
         for i in range(self.maper.row):
             for j in range(self.maper.col):
                 window.blit(self.myMap[i][j], self.mapRect[i][j])
-        window.blit(self.player, self.playerRect)
+        if (self.isDashing):
+            if (self.facing == 'left'):
+                window.blit(self.playerdashL, self.playerRect.topleft)
+            else:
+                temprect = (self.playerRect.x - 0.6 * self.playerWidth, self.playerRect.y)
+                window.blit(self.playerdashR, temprect)
+        else:
+            window.blit(self.player, self.playerRect)
 
     def handle(self, event):
         # bad code
@@ -120,30 +140,57 @@ class MapPage(Scene):
             return "EnterMenufromMap"
 
     def move(self):
-        # 按键检测
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
-            self.tryMoveX(-self.speed)
-            if self.facing != "left":
-                self.facing = "left"
-                self.frame = 0
+        if (self.touchDown()):
+            self.Dashavailable = True
+        
+        if (self.isDashing):
+            if (self.facing == 'left'):
+                self.tryMoveX(-self.dashSpeed)
             else:
-                self.frame = (self.frame + 1) % 8
-        if keys[pygame.K_d]:
-            self.tryMoveX(self.speed)
-            if self.facing != "right":
-                self.facing = "right"
-                self.frame = 0
-            else:
-                self.frame = (self.frame + 1) % 8
+                self.tryMoveX(self.dashSpeed)
+        else:
+            if keys[pygame.K_a]:
+                self.tryMoveX(-self.speed)
+                
+                # 处理人物动画
+                if self.facing != "left":
+                    self.facing = "left"
+                    self.frame = 0
+                else:
+                    self.frame = (self.frame + 1) % 8
+            
+            if keys[pygame.K_d]:
+                self.tryMoveX(self.speed)
+
+                if self.facing != "right":
+                    self.facing = "right"
+                    self.frame = 0
+                else:
+                    self.frame = (self.frame + 1) % 8
+
+        # 判断是否开始冲刺
+        if keys[pygame.K_l] and (not self.isDashing) and (self.Dashavailable):
+            self.isDashing = True  # 启动冲刺
+            self.dashTimer = pygame.time.get_ticks()  # 记录冲刺开始时间
+            self.Dashavailable = False  # 设置冲刺为不可用
+        
+        # 判断是否结束冲刺
+        if self.isDashing:
+            elapsed = pygame.time.get_ticks() - self.dashTimer
+            if elapsed > MoveSettings.dashDuration:  # 检查冲刺是否结束
+                self.isDashing = False  # 结束冲刺
+                self.onJump = False # 冲刺结束后重置跳跃状态
+
+        # 判断是否起跳
         if keys[pygame.K_SPACE] and self.touchDown():
             self.jumpTime = pygame.time.get_ticks()
             self.tryMoveY(-1)
             self.deltaY = 0
             self.onJump = True
 
-        # 考虑重力加速度
-        if self.onJump:
+        # 处理上升过程
+        if (not self.isDashing) and (self.onJump):
             delta = (pygame.time.get_ticks() - self.jumpTime) / 1000
             lastDeltaY = self.deltaY
             self.deltaY = int(
@@ -153,11 +200,13 @@ class MapPage(Scene):
             if self.touchDown():
                 self.onJump = False
 
-        if self.onJump == False and self.falling == False and self.touchDown() == False:
+        # 判断是否下落
+        if (not self.isDashing) and (self.onJump == False) and (self.falling == False) and (self.touchDown() == False):
             self.falling = True
             self.fallTime = pygame.time.get_ticks()
             self.deltaY = 0
 
+        # 处理下落过程
         if self.falling:
             delta = (pygame.time.get_ticks() - self.fallTime) / 1000
             lastDeltaY = self.deltaY
@@ -165,6 +214,7 @@ class MapPage(Scene):
             self.tryMoveY(self.deltaY - lastDeltaY)
             if self.touchDown():
                 self.falling = False
+                self.Dashavailable = True  # 重置冲刺为可用
 
         # 更新人物显示
         if self.facing == "left":
