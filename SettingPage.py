@@ -13,20 +13,20 @@ class SettingPage(Scene):
         self.volume_bar_height = 20
         self.volume_bar_x = WindowSettings.width // 2 - self.volume_bar_width // 2
         self.volume_bar_y = WindowSettings.height // 2 - 40
-        self.volume_bar_color = BLACK  # 音量条的颜色
+        self.volume_bar_color = WHITE  # 音量条的颜色
         self.volume_bar_fill_color = GREEN  # 音量条填充的颜色
 
     def show(self, window):
         pygame.display.set_caption("Settings")
-        window.fill(WHITE)
+        window.fill(BLACK)
 
         self.volume_bar_pos = int(self.volume_bar_width * self.volume)
         self.draw_volume_bar(window, self.volume)
         
         font = pygame.font.Font(FontSettings.FontPath, 36)
-        self.VolumeButton = font.render('音量', True, BLACK)
+        self.VolumeButton = font.render('音量', True, WHITE)
         self.VolumeRect = self.VolumeButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 - 80))
-        self.QuitButton = font.render('返回', True, BLACK)
+        self.QuitButton = font.render('返回', True, WHITE)
         self.QuitRect = self.QuitButton.get_rect(center=(WindowSettings.width / 2, WindowSettings.height / 2 + 40))
         window.blit(self.VolumeButton, self.VolumeRect)
         window.blit(self.QuitButton, self.QuitRect)
@@ -50,7 +50,7 @@ class SettingPage(Scene):
                 print("volume: ", self.volume)
                 return None
             elif (self.QuitRect.collidepoint(mouse_x,mouse_y)):
-                return 'EnterMenu'
+                return 'EnterMenufromSettings'
                 
     
     def draw_volume_bar(self, window, volume):

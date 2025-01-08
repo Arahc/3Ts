@@ -36,12 +36,19 @@ class Scene(Listener):
 class BgmPlayer():
     def __init__(self):
         pygame.mixer.init()
-        bgm = pygame.mixer.music.load('./assets/bgm/Time Flows Ever Onward - Evan Call.mp3')
+        bgm = pygame.mixer.music.load('./assets/bgm/Menu - Hollow Knight.mp3')
         pygame.mixer.music.play(-1)
         pygame.mixer.music.set_volume(BgmSettings.defaultvolume)
     
     def set_volume(self, volume):
         pygame.mixer.music.set_volume(volume)
+
+    def switch(self, scene):
+        if (scene == 'Menu'):
+            bgm = pygame.mixer.music.load('./assets/bgm/Menu - Hollow Knight.mp3')
+        elif (scene == 'Map'):
+            bgm = pygame.mixer.music.load('assets/bgm/Map - City of Tears.mp3')
+        pygame.mixer.music.play(-1)
 
     def post(self):
         pass

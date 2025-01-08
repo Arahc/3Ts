@@ -48,12 +48,16 @@ class GameManager():
                     if value == 'EnterMap':
                         print("EnterMap")
                         listeners=[ self.mappage ]
+                        self.bgmplayer.switch('Map')
                     elif value == 'EnterSetting':
                         print("EnterSetting")
                         listeners = [ self.settingpage ]
                     elif value == 'EnterHelp':
                         print("EnterHelp")
-                    elif value == 'EnterMenu':
+                    elif value == 'EnterMenufromSettings':
+                        listeners = [ self.menu ]
+                    elif value == 'EnterMenufromMap':
+                        self.bgmplayer.switch('Menu')
                         listeners = [ self.menu ]
 
     def render(self):

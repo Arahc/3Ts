@@ -1,11 +1,11 @@
 """
 这是个用来编辑地图的文件
 0 -> 空地
-1 -> 土
-2 -> 草地
-3 -> 石头
+1 -> 道路
+2 -> 宝箱
 
 row, col 的顺序和 pygame 坐标系顺序一样
+x 轴向右为正方向, y 轴向下为正方向
 """
 
 import random
@@ -25,4 +25,4 @@ class GenMap():
         for i in range(80):
             x = random.randint(0, self.col - 1)
             y = random.randint(4, self.row - 1)
-            self.map1[y][x] = random.randint(1, 3)
+            self.map1[y][x] = random.randint(1,2)
