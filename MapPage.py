@@ -11,6 +11,7 @@ from GenMap import GenMap
 from GameSettings import *
 from Utility import Scene
 from Npc import Npc
+from Npc import Npc
 
 class MapPage(Scene):
 
