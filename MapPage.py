@@ -10,13 +10,25 @@ import sys
 from GenMap import GenMap
 from GameSettings import *
 from Utility import Scene
-
+from Npc import Npc
 
 class MapPage(Scene):
 
     def __init__(self):
-        # 设置人物&运动状态
         self.maper = GenMap()
+        self.SetPlayer()
+        self.SetMap()
+        self.SetMove()
+
+        # 设置 NPC
+        Seer=Npc(r'.\assets\npc\Seer.png', 'Seer', width = 90, height = 90,
+                    posX = 0, posY = self.mapHeight - self.blockSize - 90)
+        self.npcs=[Seer]
+
+
+
+    # 设置玩家
+    def SetPlayer(self):
         self.facing = "right"
         self.frame = 0  # 人物运动到第几帧，一共4帧
         self.leftImage = [
@@ -29,10 +41,10 @@ class MapPage(Scene):
         ] + [
             pygame.image.load(r".\assets\character\right2.png") for _ in range(4)
         ]
-        self.edgeDist = MoveSettings.edgeDist
-        self.speed = MoveSettings.speed
+
         self.playerHeight = MoveSettings.playerHeight
         self.playerWidth = MoveSettings.playerWidth
+
         for i in range(8):
             self.leftImage[i] = pygame.transform.scale(
                 self.leftImage[i], (self.playerWidth, self.playerHeight)
@@ -50,15 +62,16 @@ class MapPage(Scene):
         self.playerdashR = pygame.transform.scale(
             self.playerdashR, (self.playerWidth*1.6, self.playerHeight)
         )
-        
 
-        # 设置地图&碰撞检测
-        self.width = WindowSettings.width
-        self.height = WindowSettings.height
+    # 设置地图
+    def SetMap(self):
+        self.edgeDist = MoveSettings.edgeDist
+        self.mapWidth = WindowSettings.width
+        self.mapHeight = WindowSettings.height
         self.blockSize = MoveSettings.blockSize
         self.background = pygame.image.load(r".\assets\map\background.png")
         self.background = pygame.transform.scale(
-            self.background, (self.width, self.height)
+            self.background, (self.mapWidth, self.mapHeight)
         )
         self.myMap = [
             [None for j in range(self.maper.col)] for i in range(self.maper.row)
@@ -84,6 +97,7 @@ class MapPage(Scene):
             r".\assets\map\air.png",
             r".\assets\map\road.png",
             r".\assets\map\chest.png",
+            r".\assets\map\trap.png",
         ]
         self.mapDelta = 0  # 地图移动距离
 
@@ -99,28 +113,29 @@ class MapPage(Scene):
                 self.mapRect[i][j].x = j * self.blockSize
                 self.mapRect[i][j].y = i * self.blockSize
 
-        # 移动相关参数
+    # 设置移动
+    def SetMove(self):
+        self.speed = MoveSettings.speed
         self.gravity = MoveSettings.gravity
         self.initialSpeed = MoveSettings.initialSpeed
-        self.jumpTime = 0
-        self.fallTime = 0
-        self.deltaY = 0
+        self.jumpTime = self.fallTime = self.lastDeltaY = self.deltaY = 0
         self.onJump = False
         self.falling = False
         self.isDashing = False
         self.Dashavailable = True  # 冲刺是否可用
         self.dashSpeed = MoveSettings.dashSpeed  # 冲刺速度
-        self.dashTimer = 0  # 新增变量，用于记录冲刺时间
+        self.dashTimer = 0  # 用于记录冲刺时间
 
-    """
-    画地图&人物
-    """
-
+    # 显示
     def show(self, window):
         window.blit(self.background, (0, 0))
         for i in range(self.maper.row):
             for j in range(self.maper.col):
                 window.blit(self.myMap[i][j], self.mapRect[i][j])
+        
+        for npc in self.npcs:
+            window.blit(npc.image, npc.imageRect)
+
         if (self.isDashing):
             if (self.facing == 'left'):
                 window.blit(self.playerdashL, self.playerRect.topleft)
@@ -136,8 +151,13 @@ class MapPage(Scene):
         # if (keys[pygame.K_a]) or (keys[pygame.K_d]) or (keys[pygame.K_w]):
         #     self.move()
         #     return None
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+        if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_ESCAPE):
             return "EnterMenufromMap"
+        if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_e):
+            if (self.touchDown()) and (not self.isDashing):
+                for npc in self.npcs:
+                    if self.playerRect.colliderect(npc.imageRect):
+                        return "EnterChat"
 
     def move(self):
         keys = pygame.key.get_pressed()
@@ -151,8 +171,7 @@ class MapPage(Scene):
                 self.tryMoveX(self.dashSpeed)
         else:
             if keys[pygame.K_a]:
-                self.tryMoveX(-self.speed)
-                
+                self.tryMoveX(-self.speed)                
                 # 处理人物动画
                 if self.facing != "left":
                     self.facing = "left"
@@ -168,6 +187,10 @@ class MapPage(Scene):
                     self.frame = 0
                 else:
                     self.frame = (self.frame + 1) % 8
+        
+        # 判断是否碰到陷阱
+        if self.touchDown() == 3:
+            print("踩到陷阱，角色死亡")
 
         # 判断是否开始冲刺
         if keys[pygame.K_l] and (not self.isDashing) and (self.Dashavailable):
@@ -181,6 +204,8 @@ class MapPage(Scene):
             if elapsed > MoveSettings.dashDuration:  # 检查冲刺是否结束
                 self.isDashing = False  # 结束冲刺
                 self.onJump = False # 冲刺结束后重置跳跃状态
+                self.fallTime = pygame.time.get_ticks()
+                self.lastDeltaY = self.deltaY = 0
 
         # 判断是否起跳
         if keys[pygame.K_SPACE] and self.touchDown():
@@ -192,26 +217,26 @@ class MapPage(Scene):
         # 处理上升过程
         if (not self.isDashing) and (self.onJump):
             delta = (pygame.time.get_ticks() - self.jumpTime) / 1000
-            lastDeltaY = self.deltaY
+            self.lastDeltaY = self.deltaY
             self.deltaY = int(
                 -self.initialSpeed * delta + 0.5 * self.gravity * delta * delta
             )
-            self.tryMoveY(self.deltaY - lastDeltaY)
+            self.tryMoveY(self.deltaY - self.lastDeltaY)
             if self.touchDown():
                 self.onJump = False
 
         # 判断是否下落
-        if (not self.isDashing) and (self.onJump == False) and (self.falling == False) and (self.touchDown() == False):
+        if (not self.isDashing) and (not self.onJump) and (not self.falling) and (not self.touchDown()):
             self.falling = True
             self.fallTime = pygame.time.get_ticks()
             self.deltaY = 0
 
         # 处理下落过程
-        if self.falling:
+        if (self.falling) and (not self.isDashing):
             delta = (pygame.time.get_ticks() - self.fallTime) / 1000
-            lastDeltaY = self.deltaY
+            self.lastDeltaY = self.deltaY
             self.deltaY = int(0.5 * self.gravity * delta * delta)
-            self.tryMoveY(self.deltaY - lastDeltaY)
+            self.tryMoveY(self.deltaY - self.lastDeltaY)
             if self.touchDown():
                 self.falling = False
                 self.Dashavailable = True  # 重置冲刺为可用
@@ -235,8 +260,8 @@ class MapPage(Scene):
                     and self.mapRect[i][j].y
                     >= self.playerRect.y + self.playerHeight - 1
                 ):
-                    return True
-        return False
+                    return self.maper.map1[i][j]
+        return 0
 
     def touchUp(self):  # 检测是否接触上面
         for i in range(self.maper.row):
@@ -246,8 +271,8 @@ class MapPage(Scene):
                     and self.playerRect.colliderect(self.mapRect[i][j])
                     and self.mapRect[i][j].y + self.blockSize - 1 >= self.playerRect.y
                 ):
-                    return True
-        return False
+                    return self.maper.map1[i][j]
+        return 0
 
     def touchSide(self):  # 检测是否接触左右面
         for i in range(self.maper.row):
@@ -258,8 +283,8 @@ class MapPage(Scene):
                     and not self.mapRect[i][j].y
                     >= self.playerRect.y + self.playerHeight - 1
                 ):
-                    return True
-        return False
+                    return self.maper.map1[i][j]
+        return 0
 
     def moveMap(self, sgnx):
         if self.mapDelta + sgnx > 0:
@@ -268,12 +293,15 @@ class MapPage(Scene):
         for i in range(self.maper.row):
             for j in range(self.maper.col):
                 self.mapRect[i][j].x += sgnx
+        # 移动npc
+        for npc in self.npcs:
+            npc.imageRect.x += sgnx
 
     def tryMoveX(self, dx):
         sgnx = 1 if dx > 0 else -1
         for i in range(abs(dx)):
             if (
-                self.playerRect.x + self.playerWidth >= self.width - self.edgeDist
+                self.playerRect.x + self.playerWidth >= self.mapWidth - self.edgeDist
                 and dx > 0
             ):
                 self.moveMap(-1)
