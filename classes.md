@@ -36,3 +36,14 @@
 - 父类：`Scene`
 
 - 方法：`handle` （处理场景的转换） `show` 
+
+### Npc
+
+依赖于地图场景，在 `MapPage` 中被初始化
+
+### Chatbox
+
+对话框
+
+- 父类：`Scene` 
+- 方法：`handle` `show` 

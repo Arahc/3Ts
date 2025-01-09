@@ -1,16 +1,7 @@
-"""
-移动相关的库
-人物和地图的左右移动（跟随镜头）
-人物的跳跃（重力加速度）
-与地图块的碰撞检测
-"""
-
-import pygame
-import sys
+import pygame, ChatBox
 from GenMap import GenMap
 from GameSettings import *
 from Utility import Scene
-from Npc import Npc
 from Npc import Npc
 
 class MapPage(Scene):
@@ -22,11 +13,9 @@ class MapPage(Scene):
         self.SetMove()
 
         # 设置 NPC
-        Seer=Npc(r'.\assets\npc\Seer.png', 'Seer', width = 90, height = 90,
+        Seer=Npc('Seer', r'.\assets\npc\Seer.png', width = 90, height = 90,
                     posX = 0, posY = self.mapHeight - self.blockSize - 90)
         self.npcs=[Seer]
-
-
 
     # 设置玩家
     def SetPlayer(self):
@@ -158,7 +147,7 @@ class MapPage(Scene):
             if (self.touchDown()) and (not self.isDashing):
                 for npc in self.npcs:
                     if self.playerRect.colliderect(npc.imageRect):
-                        return "EnterChat"
+                        return ("EnterChat",npc.name)
 
     def move(self):
         keys = pygame.key.get_pressed()
@@ -172,7 +161,8 @@ class MapPage(Scene):
                 self.tryMoveX(self.dashSpeed)
         else:
             if keys[pygame.K_a]:
-                self.tryMoveX(-self.speed)                
+                self.tryMoveX(-self.speed)
+                
                 # 处理人物动画
                 if self.facing != "left":
                     self.facing = "left"
@@ -188,14 +178,14 @@ class MapPage(Scene):
                     self.frame = 0
                 else:
                     self.frame = (self.frame + 1) % 8
-        
+
         # 判断是否碰到陷阱
         if self.touchDown() == 3:
-            print("踩到陷阱，角色死亡")
+            print("You fell into trap and died.")
 
         # 判断接触宝箱
         if self.touchDown() == 2 or self.touchSide() == 2 or self.touchUp() == 2:
-            print("获得宝箱内的...增益")
+            print("You gained some benefit from the chest.")
 
         # 判断是否开始冲刺
         if keys[pygame.K_l] and (not self.isDashing) and (self.Dashavailable):

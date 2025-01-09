@@ -70,6 +70,3 @@ class GenMap():
 
         for i in range(5):
             GenTrap()
-
-
-
