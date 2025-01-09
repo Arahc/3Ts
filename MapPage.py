@@ -193,6 +193,10 @@ class MapPage(Scene):
         if self.touchDown() == 3:
             print("踩到陷阱，角色死亡")
 
+        # 判断接触宝箱
+        if self.touchDown() == 2 or self.touchSide() == 2 or self.touchUp() == 2:
+            print("获得宝箱内的...增益")
+
         # 判断是否开始冲刺
         if keys[pygame.K_l] and (not self.isDashing) and (self.Dashavailable):
             self.isDashing = True  # 启动冲刺
