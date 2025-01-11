@@ -228,7 +228,5 @@ class GenMap():
             p = random.randint(0, len(vec) - 1)
             self.Map[0][vec[p][0]][vec[p][1]] = 3
 
-        self.Map[0][self.row - 2][0] = 3
-
         for i in range(10):
             GenTrap()
