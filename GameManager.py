@@ -4,6 +4,7 @@ from SettingPage import SettingPage
 from MapPage import MapPage
 from Utility import BgmPlayer, Scene
 from Player import Player
+from HelpPage import HelpPage
 
 class GameManager():
 
@@ -15,6 +16,7 @@ class GameManager():
         self.menu = Menu.Menu(window)
         self.bgmplayer = BgmPlayer()
         self.settingpage = SettingPage(self.bgmplayer)
+        self.helppage = HelpPage()
         self.nowmap = 1
         self.map = [None for i in range(3)]
         for i in range(1,3):
@@ -61,7 +63,8 @@ class GameManager():
                     listeners = [ self.settingpage ]
                 elif value == 'EnterHelp':
                     print('EnterHelp')
-                elif value == 'EnterMenufromSettings':
+                    listeners = [ self.helppage ]
+                elif (value == 'EnterMenufromSettings') or (value == 'EnterMenufromHelp'):
                     listeners = [ self.menu ]
                 elif value == 'EnterMenufromMap':
                     self.bgmplayer.switch('Menu')

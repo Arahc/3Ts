@@ -13,9 +13,12 @@ class MapPage(Scene):
         self.SetMove()
 
         # 设置 NPC
-        Seer=Npc('Seer', r'.\assets\npc\Seer.png', width = 90, height = 90,
-                    posX = 0, posY = self.mapHeight - self.blockSize - 90)
-        self.npcs=[Seer]
+        if (id == 1):
+            Seer=Npc('Seer', r'.\assets\npc\Seer.png', width = 90, height = 90,
+                        posX = 0, posY = self.mapHeight - self.blockSize - 90)
+            self.npcs=[Seer]
+        else:
+            self.npcs = []
 
     # 设置地图
     def SetMap(self, id):
