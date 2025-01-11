@@ -90,10 +90,16 @@ class MapPage(Scene):
         self.ChestMoney = self.maper.ChestMoney[id]
         for i in range(self.maper.row):
             for j in range(self.maper.col):
-                self.imgMap[i][j] = pygame.image.load(blocks[self.numMap[i][j]])
-                self.imgMap[i][j] = pygame.transform.scale(
-                    self.imgMap[i][j], (self.blockSize, self.blockSize)
-                )
+                if (self.numMap[i][j] == 2) and (self.Chestava[i][j] == False): # 特殊处理打开过的箱子
+                    self.imgMap[i][j] = pygame.image.load(r".\assets\map\openedchest.png")
+                    self.imgMap[i][j] = pygame.transform.scale(
+                        self.imgMap[i][j], (self.blockSize, self.blockSize * 1.289)
+                    )
+                else:
+                    self.imgMap[i][j] = pygame.image.load(blocks[self.numMap[i][j]])
+                    self.imgMap[i][j] = pygame.transform.scale(
+                        self.imgMap[i][j], (self.blockSize, self.blockSize)
+                    )
                 # window.blit(self.imgMap[i][j], (j * self.blockSize, i * self.blockSize))
                 self.mapRect[i][j] = self.imgMap[i][j].get_rect()
                 self.mapRect[i][j].x = j * self.blockSize
@@ -198,8 +204,6 @@ class MapPage(Scene):
                 else:
                     self.player.frame = (self.player.frame + 1) % 8
         
-        print(self.onSide())
-
         # 判断是否碰到陷阱
         if (self.touchDown() == 3) or (self.touchUp() == 3) or (self.onSide() == 3):
             print("You fell into trap. Please try again.")
