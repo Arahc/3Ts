@@ -5,6 +5,7 @@ from MapPage import MapPage
 from Utility import BgmPlayer, Scene
 from Player import Player
 from HelpPage import HelpPage
+from ShopPage import ShopPage
 
 class GameManager():
 
@@ -22,6 +23,7 @@ class GameManager():
         for i in range(1,3):
             self.map[i] = MapPage(self.player, i)
         self.chatboxes = { 'Seer': ChatBox.ChatBox('Seer') }
+        self.shoppage = ShopPage(self.player)
         listeners = [ self.menu ]
         events = []
         
@@ -80,10 +82,16 @@ class GameManager():
                         self.nowmap += 1
                     else:
                         self.nowmap -= 1
+                    if (self.nowmap == 0):
+                        self.map[0] = MapPage(self.player, 0)
                     listeners = [ self.map[self.nowmap] ]
                     self.map[self.nowmap].reborn(self.nowmap)
                     BgmPlayer().switch('Map'+str(self.nowmap))
                     self.player.Rect.x = self.player.Rect.y = 0
+                elif (value == 'EnterShop'):
+                    listeners.append(self.shoppage)
+                elif (value == 'QuitShop'):
+                    listeners.remove(self.shoppage)
 
     def render(self):
         pygame.display.flip()

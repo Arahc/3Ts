@@ -45,5 +45,12 @@ class ChatBoxSettings():
     input_box_width = chatbox_width
     input_box_height = 50
 
+class ShopSettings():
+    shop_x = 100
+    shop_y = 50
+    width = 800
+    height = 400
+    shopbox_color = (0, 0, 0, 128)  # 半透明黑色购买框
+
 class FontSettings():
     FontPath = 'C:\\Windows\\Fonts\\simsun.ttc'  # 华文宋体字体路径

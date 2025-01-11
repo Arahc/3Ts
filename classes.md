@@ -47,3 +47,13 @@
 
 - 父类：`Scene` 
 - 方法：`handle` `show` 
+
+### Player
+
+玩家
+
+### ShopPage
+
+商店
+
+- 父类：`Scene`
