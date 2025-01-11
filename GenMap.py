@@ -4,8 +4,7 @@
 1 -> 道路
 2 -> 宝箱
 3 -> 地刺
-4,5 -> 传送门（前进）
-6,7 -> 传送门（返回）
+4,5 -> 传送门（下）
 
 row, col 的顺序和 pygame 坐标系顺序一样
 x 轴向右为正方向, y 轴向下为正方向
@@ -20,17 +19,22 @@ class GenMap():
         self.col = WindowSettings.width // MoveSettings.blockSize
         self.col *= 3   # 屏幕外的地图
         # row = 13, col = 60
-        
         r = self.row
         c = self.col
+        self.ChestMoney = [[[0 for i in range(c)] for j in range(r)] for k in range(3)] # n*m*3
         self.Map = [[[0 for i in range(c)] for j in range(r)] for k in range(3)] # n*m*3
+
+        self.designedMap() # Map[1, 2, ...]
+        self.randomMap() # Map[0]
+        
+    # 手工制作的关卡地图
+    def designedMap(self):
+        r = self.row
+        c = self.col
 
         # 铺地板
         for j in range(c):
             self.Map[1][r - 1][j] = 1
-        
-        self.ChestMoney = [[[0 for i in range(c)] for j in range(r)] for k in range(3)] # n*m*3
-        
         # 多级向上 AD 跳
         for i in range(r - 3):
             self.Map[1][i][3] = 1
@@ -103,8 +107,7 @@ class GenMap():
         # 铺地板
         for j in range(self.col):
             self.Map[2][r - 1][j] = 1
-        self.Map[2][r - 2][0] = 6
-        self.Map[2][r - 2][1] = 7
+        
         self.Map[2][r - 4][3] = 1
         self.Map[2][r - 7][3] = 1
         self.Map[2][r - 10][3] = 1
@@ -150,46 +153,82 @@ class GenMap():
         self.Map[2][r - 2][44] = 3
         self.Map[2][r - 2][45] = 3
         
-        # 随机生成地图
-        # # terrain1 几段连续的跳台
-        # len1 = 5 # 每段 5 块
-        # cnt1 = 3 # 3 段
-        # maxHeight1 = 3 # 相邻两端的最大落差
-        # def GenTerrain1(x):
-        #     lastY = r // 2
-        #     for i in range(cnt1):
-        #         l = max(lastY - maxHeight1, 2)
-        #         r = min(lastY + maxHeight1, r - 3) # 可以从最低的地面直接通过
-        #         y = random.randint(l, r)
-        #         L = x + i * len1
-        #         R = min(c - 1, x + (i + 1) * len1 - 1)
-        #         for j in range(L, R):
-        #             self.Map[1][y][j] = 1
-        #         lastY = y
+    # 随机生成地图
+    def randomMap(self):
+        # 铺地板
+        for j in range(self.col):
+            self.Map[0][self.row - 1][j] = self.Map[2][self.row - 1][j] = 1
+
+        '''
+        GenTerrain1 几段连续的跳台
+        '''
+        len1 = 5 # 每段 5 块
+        cnt1 = 3 # 3 段
+        maxHeight1 = 3 # 相邻两端的最大落差
+        def GenTerrain1(x):
+            lastY = self.row // 2
+            for i in range(cnt1):
+                l = max(lastY - maxHeight1, 3)
+                r = min(lastY + maxHeight1, self.row - 3) # 可以从最低的地面直接通过
+                y = random.randint(l, r)
+                L = x + i * len1
+                R = min(self.col - 1, x + (i + 1) * len1 - 1)
+                for j in range(L, R):
+                    self.Map[0][y][j] = 1
+                lastY = y
+
+        for i in range(0, self.col, len1 * cnt1 + 2):
+            GenTerrain1(i)
+
+        '''
+        GenTerrain2 阶梯（上或下）
+        '''
+        def GenTerrain2(x):
+            cnt = random.randint(2, 5)
+            y = random.randint(cnt, self.row - cnt)
+            dy = random.randint(0, 1)
+            if dy == 0:
+                dy = -1
+            for i in range(cnt):
+                self.Map[0][y][x + i] = 1
+                y += dy
         
-        # for i in range(0, c - 1, len1 * cnt1):
-        #     GenTerrain1(i)
+        for i in range(5):
+            GenTerrain2(random.randint(5, self.col - 5))
 
-        # # GenChest 生成宝箱
-        # def GenChest():
-        #     vec = []
-        #     for i in range(r):
-        #         for j in range(c):
-        #             if self.Map[1][i][j] == 1 and i > 0:
-        #                 vec.append((i, j))
-        #     random.shuffle(vec)
-        #     self.Map[1][vec[0][0] - 1][vec[0][1]] = 2
-        #     self.ChestMoney[1][vec[0][0] - 1][vec[0][1]] = random.randint(20, 30)
+        '''
+        GenChest 生成宝箱
+        '''
+        def GenChest():
+            vec = []
+            for i in range(self.row):
+                for j in range(self.col):
+                    if self.Map[0][i][j] == 1 and i > 0:
+                        vec.append((i, j))
+            random.shuffle(vec)
+            self.Map[0][vec[0][0] - 1][vec[0][1]] = 2
+            self.ChestMoney[0][vec[0][0] - 1][vec[0][1]] = random.randint(20, 30)
         
-        # for i in range(10):
-        #     GenChest()
+        for i in range(10):
+            GenChest()
 
-        # # GenTrap 生成陷阱
-        # def GenTrap():
-        #     l = random.randint(0, c - 1)
-        #     r = random.randint(l, min(l + 3, c - 1))
-        #     for i in range(l, r):
-        #         self.Map[1][r - 1][i] = 3
+        '''
+        GenTrap 生成陷阱
+        '''
+        def GenTrap():
+            # l = random.randint(0, self.col - 1)
+            # r = random.randint(l, min(l + 3, self.col - 1))
+            # for i in range(l, r):
+            #     self.Map[0][self.row - 1][i] = 3
+            vec = []
+            for i in range(self.row):
+                for j in range(self.col):
+                    if self.Map[0][i][j] == 1:
+                        vec.append([i, j])
+            p = random.randint(0, len(vec) - 1)
+            self.Map[0][vec[p][0]][vec[p][1]] = 3
 
-        # for i in range(5):
-        #     GenTrap()
+        self.Map[0][self.row - 2][0] = 3
+
+        for i in range(10):
+            GenTrap()
