@@ -173,7 +173,7 @@ class GenMap():
         '''
         len1 = 5 # 每段 5 块
         cnt1 = 3 # 3 段
-        maxHeight1 = 3 # 相邻两端的最大落差
+        maxHeight1 = 2 # 相邻两段的最大落差
         def GenTerrain1(x):
             lastY = self.row // 2
             for i in range(cnt1):

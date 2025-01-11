@@ -228,7 +228,7 @@ class MapPage(Scene):
         # 判断是否碰到陷阱
         if (self.player.Rect.y > self.maper.row * self.blockSize) or (self.touchDown() == 3) or (self.touchUp() == 3) or (self.onSide() == 3):
             print("You fell into trap. Please try again.")
-            # self.reborn(self.mapid)
+            self.reborn(self.mapid)
 
         # 判断是否开始冲刺
         if keys[pygame.K_l] and (not self.player.isDashing) and (self.Dashavailable):
