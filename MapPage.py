@@ -6,10 +6,10 @@ from Npc import Npc
 
 class MapPage(Scene):
 
-    def __init__(self, player):
+    def __init__(self, player, id):
         self.maper = GenMap()
         self.player = player
-        self.SetMap()
+        self.SetMap(id)
         self.SetMove()
 
         # 设置 NPC
@@ -18,7 +18,7 @@ class MapPage(Scene):
         self.npcs=[Seer]
 
     # 设置地图
-    def SetMap(self):
+    def SetMap(self, id):
         self.edgeDist = MoveSettings.edgeDist
         self.mapWidth = WindowSettings.width
         self.mapHeight = WindowSettings.height
@@ -39,7 +39,7 @@ class MapPage(Scene):
             [False for j in range(self.maper.col)] for i in range(self.maper.row)
         ]
 
-        self.numMap = self.maper.map1
+        self.numMap = self.maper.Map[id]
         for i in range(self.maper.row):
             for j in range(self.maper.col):
                 if (self.numMap[i][j] != 0) and (self.numMap[i][j] != 2):
@@ -60,7 +60,7 @@ class MapPage(Scene):
             r".\assets\map\trap.png",
         ]
         self.mapDelta = 0  # 地图移动距离
-        self.ChestMoney = self.maper.ChestMoney
+        self.ChestMoney = self.maper.ChestMoney[id]
         for i in range(self.maper.row):
             for j in range(self.maper.col):
                 self.imgMap[i][j] = pygame.image.load(blocks[self.numMap[i][j]])
@@ -158,8 +158,8 @@ class MapPage(Scene):
                     self.player.frame = (self.player.frame + 1) % 8
 
         # 判断是否碰到陷阱
-        if self.touchDown() == 3:
-            print("You fell into trap and died.")
+        if (self.touchDown() == 3) or (self.touchUp() == 3) or (self.touchSide() == 3):
+            print("You fell into trap. Please try again.")
 
         # 判断是否开始冲刺
         if keys[pygame.K_l] and (not self.player.isDashing) and (self.Dashavailable):
@@ -229,7 +229,7 @@ class MapPage(Scene):
                     and self.mapRect[i][j].y
                     >= self.player.Rect.y + self.player.height - 1
                 ):
-                    return self.maper.map1[i][j]
+                    return self.numMap[i][j]
         return 0
 
     def touchUp(self):  # 检测是否接触上面
@@ -240,7 +240,7 @@ class MapPage(Scene):
                     and self.player.Rect.colliderect(self.mapRect[i][j])
                     and self.mapRect[i][j].y + self.blockSize - 1 >= self.player.Rect.y
                 ):
-                    return self.maper.map1[i][j]
+                    return self.numMap[i][j]
         return 0
 
     def touchSide(self):  # 检测是否接触左右面
@@ -252,7 +252,7 @@ class MapPage(Scene):
                     and not self.mapRect[i][j].y
                     >= self.player.Rect.y + self.player.height - 1
                 ):
-                    return self.maper.map1[i][j]
+                    return self.numMap[i][j]
         return 0
 
     def moveMap(self, sgnx):
