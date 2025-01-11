@@ -81,6 +81,7 @@ class GameManager():
                     else:
                         self.nowmap -= 1
                     listeners = [ self.map[self.nowmap] ]
+                    self.map[self.nowmap].reborn(self.nowmap)
                     BgmPlayer().switch('Map'+str(self.nowmap))
                     self.player.Rect.x = self.player.Rect.y = 0
 

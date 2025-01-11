@@ -4,7 +4,8 @@
 1 -> 道路
 2 -> 宝箱
 3 -> 地刺
-4,5 -> 传送门（下）
+4,5 -> 传送门（前进）
+6,7 -> 传送门（返回）
 
 row, col 的顺序和 pygame 坐标系顺序一样
 x 轴向右为正方向, y 轴向下为正方向
@@ -102,7 +103,8 @@ class GenMap():
         # 铺地板
         for j in range(self.col):
             self.Map[2][r - 1][j] = 1
-        
+        self.Map[2][r - 2][0] = 6
+        self.Map[2][r - 2][1] = 7
         self.Map[2][r - 4][3] = 1
         self.Map[2][r - 7][3] = 1
         self.Map[2][r - 10][3] = 1
