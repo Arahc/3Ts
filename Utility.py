@@ -46,8 +46,10 @@ class BgmPlayer():
     def switch(self, scene):
         if (scene == 'Menu'):
             bgm = pygame.mixer.music.load('./assets/bgm/Menu - Hollow Knight.mp3')
-        elif (scene == 'Map'):
+        elif (scene == 'Map1'):
             bgm = pygame.mixer.music.load('assets/bgm/Map - City of Tears.mp3')
+        elif (scene == 'Map2'):
+            bgm = pygame.mixer.music.load('assets/bgm/Map - Crossroads.mp3')
         pygame.mixer.music.play(-1)
 
     def post(self):

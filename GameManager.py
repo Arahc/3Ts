@@ -15,7 +15,10 @@ class GameManager():
         self.menu = Menu.Menu(window)
         self.bgmplayer = BgmPlayer()
         self.settingpage = SettingPage(self.bgmplayer)
-        self.mappage = MapPage(self.player)
+        self.nowmap = 1
+        self.map = [None for i in range(3)]
+        for i in range(1,3):
+            self.map[i] = MapPage(self.player, i)
         self.chatboxes = { 'Seer': ChatBox.ChatBox('Seer') }
         listeners = [ self.menu ]
         events = []
@@ -51,8 +54,8 @@ class GameManager():
             if value != None:
                 if value == 'EnterMap':
                     print('EnterMap')
-                    listeners=[ self.mappage ]
-                    self.bgmplayer.switch('Map')
+                    listeners=[ self.map[self.nowmap] ]
+                    self.bgmplayer.switch('Map'+str(self.nowmap))
                 elif value == 'EnterSetting':
                     print('EnterSetting')
                     listeners = [ self.settingpage ]
@@ -69,6 +72,14 @@ class GameManager():
                 elif (isinstance(value, tuple)) and (value[0] == 'EndChat'):
                     listeners.remove(self.chatboxes[value[1]])
                     print('EndChat')
+                elif (isinstance(value, tuple)) and (value[0] == 'EnterTeleport'):
+                    if (value[1] == 4) or (value[1] == 5):
+                        self.nowmap += 1
+                    else:
+                        self.nowmap -= 1
+                    listeners = [ self.map[self.nowmap] ]
+                    BgmPlayer().switch('Map'+str(self.nowmap))
+                    self.player.Rect.x = self.player.Rect.y = 0
 
     def render(self):
         pygame.display.flip()

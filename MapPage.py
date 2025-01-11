@@ -23,7 +23,7 @@ class MapPage(Scene):
         self.mapWidth = WindowSettings.width
         self.mapHeight = WindowSettings.height
         self.blockSize = MoveSettings.blockSize
-        self.background = pygame.image.load(r".\assets\map\background.png")
+        self.background = pygame.image.load(r".\assets\map\background"+str(id)+".png")
         self.background = pygame.transform.scale(
             self.background, (self.mapWidth, self.mapHeight)
         )
@@ -42,7 +42,7 @@ class MapPage(Scene):
         self.numMap = self.maper.Map[id]
         for i in range(self.maper.row):
             for j in range(self.maper.col):
-                if (self.numMap[i][j] != 0) and (self.numMap[i][j] != 2):
+                if (self.numMap[i][j] == 1) or (self.numMap[i][j] == 3):
                     self.IsEntity[i][j] = True
                 else:
                     self.IsEntity[i][j] = False
@@ -58,6 +58,8 @@ class MapPage(Scene):
             r".\assets\map\road.png",
             r".\assets\map\chest.png",
             r".\assets\map\trap.png",
+            r".\assets\map\benchL.png",
+            r".\assets\map\benchR.png",
         ]
         self.mapDelta = 0  # 地图移动距离
         self.ChestMoney = self.maper.ChestMoney[id]
@@ -126,6 +128,13 @@ class MapPage(Scene):
                         self.imgMap[i][j] = pygame.transform.scale(
                             self.imgMap[i][j], (self.blockSize, self.blockSize * 1.289)
                         )
+            
+            # 判断是否进入传送门
+            if (self.touchDown()) and (not self.player.isDashing):
+                for i in range(self.maper.row):
+                    for j in range(self.maper.col):
+                        if ((self.numMap[i][j] == 4) or (self.numMap[i][j] == 5)) and (self.player.Rect.colliderect(self.mapRect[i][j])):
+                            return ("EnterTeleport",self.numMap[i][j])
 
     def move(self):
         keys = pygame.key.get_pressed()
