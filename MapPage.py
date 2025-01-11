@@ -46,11 +46,11 @@ class MapPage(Scene):
         self.playerRect = self.player.get_rect()
         self.playerdashL = pygame.image.load(r".\assets\character\left - dash.png")
         self.playerdashL = pygame.transform.scale(
-            self.playerdashL, (self.playerWidth*1.6, self.playerHeight)
+            self.playerdashL, (self.playerWidth * 2.42, self.playerHeight * 0.83)
         )
         self.playerdashR = pygame.image.load(r".\assets\character\right - dash.png")
         self.playerdashR = pygame.transform.scale(
-            self.playerdashR, (self.playerWidth*1.6, self.playerHeight)
+            self.playerdashR, (self.playerWidth * 2.42, self.playerHeight * 0.83)
         )
 
     # 设置地图
@@ -130,7 +130,7 @@ class MapPage(Scene):
             if (self.facing == 'left'):
                 window.blit(self.playerdashL, self.playerRect.topleft)
             else:
-                temprect = (self.playerRect.x - 0.6 * self.playerWidth, self.playerRect.y)
+                temprect = (self.playerRect.x - 1.42 * self.playerWidth, self.playerRect.y + 0.17 * self.playerHeight)
                 window.blit(self.playerdashR, temprect)
         else:
             window.blit(self.player, self.playerRect)
