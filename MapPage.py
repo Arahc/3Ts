@@ -6,9 +6,9 @@ from Npc import Npc
 
 class MapPage(Scene):
 
-    def __init__(self):
+    def __init__(self, player):
         self.maper = GenMap()
-        self.SetPlayer()
+        self.player = player
         self.SetMap()
         self.SetMove()
 
@@ -16,42 +16,6 @@ class MapPage(Scene):
         Seer=Npc('Seer', r'.\assets\npc\Seer.png', width = 90, height = 90,
                     posX = 0, posY = self.mapHeight - self.blockSize - 90)
         self.npcs=[Seer]
-
-    # 设置玩家
-    def SetPlayer(self):
-        self.facing = "right"
-        self.frame = 0  # 人物运动到第几帧，一共4帧
-        self.leftImage = [
-            pygame.image.load(r".\assets\character\left1.png") for _ in range(4)
-        ] + [
-            pygame.image.load(r".\assets\character\left2.png") for _ in range(4)
-        ]
-        self.rightImage = [
-            pygame.image.load(r".\assets\character\right1.png") for _ in range(4)
-        ] + [
-            pygame.image.load(r".\assets\character\right2.png") for _ in range(4)
-        ]
-
-        self.playerHeight = MoveSettings.playerHeight
-        self.playerWidth = MoveSettings.playerWidth
-
-        for i in range(8):
-            self.leftImage[i] = pygame.transform.scale(
-                self.leftImage[i], (self.playerWidth, self.playerHeight)
-            )
-            self.rightImage[i] = pygame.transform.scale(
-                self.rightImage[i], (self.playerWidth, self.playerHeight)
-            )
-        self.player = self.rightImage[0]
-        self.playerRect = self.player.get_rect()
-        self.playerdashL = pygame.image.load(r".\assets\character\left - dash.png")
-        self.playerdashL = pygame.transform.scale(
-            self.playerdashL, (self.playerWidth * 2.42, self.playerHeight * 0.83)
-        )
-        self.playerdashR = pygame.image.load(r".\assets\character\right - dash.png")
-        self.playerdashR = pygame.transform.scale(
-            self.playerdashR, (self.playerWidth * 2.42, self.playerHeight * 0.83)
-        )
 
     # 设置地图
     def SetMap(self):
@@ -63,7 +27,7 @@ class MapPage(Scene):
         self.background = pygame.transform.scale(
             self.background, (self.mapWidth, self.mapHeight)
         )
-        self.myMap = [
+        self.imgMap = [
             [None for j in range(self.maper.col)] for i in range(self.maper.row)
         ]
         
@@ -71,13 +35,19 @@ class MapPage(Scene):
             [None for j in range(self.maper.col)] for i in range(self.maper.row)
         ]
 
+        self.Chestava = [
+            [False for j in range(self.maper.col)] for i in range(self.maper.row)
+        ]
+
         self.numMap = self.maper.map1
         for i in range(self.maper.row):
             for j in range(self.maper.col):
-                if (self.numMap[i][j] != 0) and (self.numMap[i][j] != 4):
+                if (self.numMap[i][j] != 0) and (self.numMap[i][j] != 2):
                     self.IsEntity[i][j] = True
                 else:
                     self.IsEntity[i][j] = False
+                    if (self.numMap[i][j] == 2):
+                        self.Chestava[i][j] = True
 
         self.mapRect = [
             [None for j in range(self.maper.col)] for i in range(self.maper.row)
@@ -90,30 +60,28 @@ class MapPage(Scene):
             r".\assets\map\trap.png",
         ]
         self.mapDelta = 0  # 地图移动距离
-
+        self.ChestMoney = self.maper.ChestMoney
         for i in range(self.maper.row):
             for j in range(self.maper.col):
-                self.myMap[i][j] = pygame.image.load(blocks[self.numMap[i][j]])
-                self.myMap[i][j] = pygame.transform.scale(
-                    self.myMap[i][j], (self.blockSize, self.blockSize)
+                self.imgMap[i][j] = pygame.image.load(blocks[self.numMap[i][j]])
+                self.imgMap[i][j] = pygame.transform.scale(
+                    self.imgMap[i][j], (self.blockSize, self.blockSize)
                 )
 
-                # window.blit(self.myMap[i][j], (j * self.blockSize, i * self.blockSize))
-                self.mapRect[i][j] = self.myMap[i][j].get_rect()
+                # window.blit(self.imgMap[i][j], (j * self.blockSize, i * self.blockSize))
+                self.mapRect[i][j] = self.imgMap[i][j].get_rect()
                 self.mapRect[i][j].x = j * self.blockSize
                 self.mapRect[i][j].y = i * self.blockSize
 
     # 设置移动
     def SetMove(self):
-        self.speed = MoveSettings.speed
         self.gravity = MoveSettings.gravity
         self.initialSpeed = MoveSettings.initialSpeed
         self.jumpTime = self.fallTime = self.lastDeltaY = self.deltaY = 0
-        self.onJump = False
         self.falling = False
-        self.isDashing = False
+        self.player.isDashing = False
+        self.player.onJump = False
         self.Dashavailable = True  # 冲刺是否可用
-        self.dashSpeed = MoveSettings.dashSpeed  # 冲刺速度
         self.dashTimer = 0  # 用于记录冲刺时间
 
     # 显示
@@ -121,19 +89,15 @@ class MapPage(Scene):
         window.blit(self.background, (0, 0))
         for i in range(self.maper.row):
             for j in range(self.maper.col):
-                window.blit(self.myMap[i][j], self.mapRect[i][j])
+                # 特殊处理打开的箱子
+                if (self.numMap[i][j] == 2) and (self.Chestava[i][j] == False):
+                    window.blit(self.imgMap[i][j], (self.mapRect[i][j].x, self.mapRect[i][j].y - 0.289 * self.blockSize))
+                else:
+                    window.blit(self.imgMap[i][j], self.mapRect[i][j])
         
         for npc in self.npcs:
             window.blit(npc.image, npc.imageRect)
-
-        if (self.isDashing):
-            if (self.facing == 'left'):
-                window.blit(self.playerdashL, self.playerRect.topleft)
-            else:
-                temprect = (self.playerRect.x - 1.42 * self.playerWidth, self.playerRect.y + 0.17 * self.playerHeight)
-                window.blit(self.playerdashR, temprect)
-        else:
-            window.blit(self.player, self.playerRect)
+        self.player.show(window)
 
     def handle(self, event):
         # bad code
@@ -144,61 +108,71 @@ class MapPage(Scene):
         if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_ESCAPE):
             return "EnterMenufromMap"
         if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_e):
-            if (self.touchDown()) and (not self.isDashing):
+
+            # 判断是否进入对话
+            if (self.touchDown()) and (not self.player.isDashing):
                 for npc in self.npcs:
-                    if self.playerRect.colliderect(npc.imageRect):
+                    if self.player.Rect.colliderect(npc.imageRect):
                         return ("EnterChat",npc.name)
+            
+            # 判断接触宝箱
+            for i in range(self.maper.row):
+                for j in range(self.maper.col):
+                    if self.numMap[i][j] == 2 and self.Chestava[i][j] == True and self.player.Rect.colliderect(self.mapRect[i][j]):
+                        print("You opened the chest.")
+                        self.player.money += self.ChestMoney[i][j]
+                        self.Chestava[i][j] = False
+                        self.imgMap[i][j] = pygame.image.load(r".\assets\map\openedchest.png")
+                        self.imgMap[i][j] = pygame.transform.scale(
+                            self.imgMap[i][j], (self.blockSize, self.blockSize * 1.289)
+                        )
 
     def move(self):
         keys = pygame.key.get_pressed()
         if (self.touchDown()):
             self.Dashavailable = True
         
-        if (self.isDashing):
-            if (self.facing == 'left'):
-                self.tryMoveX(-self.dashSpeed)
+        if (self.player.isDashing):
+            if (self.player.facing == 'left'):
+                self.tryMoveX(-self.player.dashSpeed)
             else:
-                self.tryMoveX(self.dashSpeed)
+                self.tryMoveX(self.player.dashSpeed)
         else:
             if keys[pygame.K_a]:
-                self.tryMoveX(-self.speed)
+                self.tryMoveX(-self.player.speed)
                 
                 # 处理人物动画
-                if self.facing != "left":
-                    self.facing = "left"
-                    self.frame = 0
+                if self.player.facing != "left":
+                    self.player.facing = "left"
+                    self.player.frame = 0
                 else:
-                    self.frame = (self.frame + 1) % 8
+                    self.player.frame = (self.player.frame + 1) % 8
             
             if keys[pygame.K_d]:
-                self.tryMoveX(self.speed)
+                self.tryMoveX(self.player.speed)
 
-                if self.facing != "right":
-                    self.facing = "right"
-                    self.frame = 0
+                if self.player.facing != "right":
+                    self.player.facing = "right"
+                    self.player.frame = 0
                 else:
-                    self.frame = (self.frame + 1) % 8
+                    self.player.frame = (self.player.frame + 1) % 8
 
         # 判断是否碰到陷阱
         if self.touchDown() == 3:
             print("You fell into trap and died.")
 
-        # 判断接触宝箱
-        if self.touchDown() == 2 or self.touchSide() == 2 or self.touchUp() == 2:
-            print("You gained some benefit from the chest.")
-
         # 判断是否开始冲刺
-        if keys[pygame.K_l] and (not self.isDashing) and (self.Dashavailable):
-            self.isDashing = True  # 启动冲刺
+        if keys[pygame.K_l] and (not self.player.isDashing) and (self.Dashavailable):
+            self.player.isDashing = True  # 启动冲刺
             self.dashTimer = pygame.time.get_ticks()  # 记录冲刺开始时间
             self.Dashavailable = False  # 设置冲刺为不可用
         
         # 判断是否结束冲刺
-        if self.isDashing:
+        if self.player.isDashing:
             elapsed = pygame.time.get_ticks() - self.dashTimer
             if elapsed > MoveSettings.dashDuration:  # 检查冲刺是否结束
-                self.isDashing = False  # 结束冲刺
-                self.onJump = False # 冲刺结束后重置跳跃状态
+                self.player.isDashing = False  # 结束冲刺
+                self.player.onJump = False # 冲刺结束后重置跳跃状态
                 self.fallTime = pygame.time.get_ticks()
                 self.lastDeltaY = self.deltaY = 0
 
@@ -207,10 +181,10 @@ class MapPage(Scene):
             self.jumpTime = pygame.time.get_ticks()
             self.tryMoveY(-1)
             self.deltaY = 0
-            self.onJump = True
+            self.player.onJump = True
 
         # 处理上升过程
-        if (not self.isDashing) and (self.onJump):
+        if (not self.player.isDashing) and (self.player.onJump):
             delta = (pygame.time.get_ticks() - self.jumpTime) / 1000
             self.lastDeltaY = self.deltaY
             self.deltaY = int(
@@ -218,16 +192,16 @@ class MapPage(Scene):
             )
             self.tryMoveY(self.deltaY - self.lastDeltaY)
             if self.touchDown():
-                self.onJump = False
+                self.player.onJump = False
 
         # 判断是否下落
-        if (not self.isDashing) and (not self.onJump) and (not self.falling) and (not self.touchDown()):
+        if (not self.player.isDashing) and (not self.player.onJump) and (not self.falling) and (not self.touchDown()):
             self.falling = True
             self.fallTime = pygame.time.get_ticks()
             self.deltaY = 0
 
         # 处理下落过程
-        if (self.falling) and (not self.isDashing):
+        if (self.falling) and (not self.player.isDashing):
             delta = (pygame.time.get_ticks() - self.fallTime) / 1000
             self.lastDeltaY = self.deltaY
             self.deltaY = int(0.5 * self.gravity * delta * delta)
@@ -237,10 +211,10 @@ class MapPage(Scene):
                 self.Dashavailable = True  # 重置冲刺为可用
 
         # 更新人物显示
-        if self.facing == "left":
-            self.player = self.leftImage[self.frame]
+        if self.player.facing == "left":
+            self.player.img = self.player.leftimg[self.player.frame]
         else:
-            self.player = self.rightImage[self.frame]
+            self.player.img = self.player.rightimg[self.player.frame]
 
     """
     人物移动 & 地图移动
@@ -251,9 +225,9 @@ class MapPage(Scene):
             for j in range(self.maper.col):
                 if (
                     self.IsEntity[i][j] == True
-                    and self.playerRect.colliderect(self.mapRect[i][j])
+                    and self.player.Rect.colliderect(self.mapRect[i][j])
                     and self.mapRect[i][j].y
-                    >= self.playerRect.y + self.playerHeight - 1
+                    >= self.player.Rect.y + self.player.height - 1
                 ):
                     return self.maper.map1[i][j]
         return 0
@@ -263,8 +237,8 @@ class MapPage(Scene):
             for j in range(self.maper.col):
                 if (
                     self.IsEntity[i][j] == True
-                    and self.playerRect.colliderect(self.mapRect[i][j])
-                    and self.mapRect[i][j].y + self.blockSize - 1 >= self.playerRect.y
+                    and self.player.Rect.colliderect(self.mapRect[i][j])
+                    and self.mapRect[i][j].y + self.blockSize - 1 >= self.player.Rect.y
                 ):
                     return self.maper.map1[i][j]
         return 0
@@ -274,9 +248,9 @@ class MapPage(Scene):
             for j in range(self.maper.col):
                 if (
                     self.IsEntity[i][j] == True
-                    and self.playerRect.colliderect(self.mapRect[i][j])
+                    and self.player.Rect.colliderect(self.mapRect[i][j])
                     and not self.mapRect[i][j].y
-                    >= self.playerRect.y + self.playerHeight - 1
+                    >= self.player.Rect.y + self.player.height - 1
                 ):
                     return self.maper.map1[i][j]
         return 0
@@ -296,36 +270,36 @@ class MapPage(Scene):
         sgnx = 1 if dx > 0 else -1
         for i in range(abs(dx)):
             if (
-                self.playerRect.x + self.playerWidth >= self.mapWidth - self.edgeDist
+                self.player.Rect.x + self.player.width >= self.mapWidth - self.edgeDist
                 and dx > 0
             ):
                 self.moveMap(-1)
                 if self.touchSide():
                     self.moveMap(1)
-            elif self.playerRect.x <= self.edgeDist and dx < 0 and self.mapDelta != 0:
+            elif self.player.Rect.x <= self.edgeDist and dx < 0 and self.mapDelta != 0:
                 self.moveMap(1)
                 if self.touchSide():
                     self.moveMap(-1)
             else:
-                self.playerRect.x += sgnx
-                if self.touchSide() or self.playerRect.x < 0:
-                    self.playerRect.x -= sgnx
+                self.player.Rect.x += sgnx
+                if self.touchSide() or self.player.Rect.x < 0:
+                    self.player.Rect.x -= sgnx
                     break
 
     def tryMoveY(self, dy):
         sgny = 1 if dy > 0 else -1
         for i in range(abs(dy)):
-            self.playerRect.y += sgny
+            self.player.Rect.y += sgny
             if self.touchDown():
                 break
             elif self.touchUp():
                 self.tryMoveY(1)
                 self.falling = True
-                self.onJump = False
+                self.player.onJump = False
                 self.fallTime = pygame.time.get_ticks()
                 self.deltaY = 0
                 break
 
     def sinkDown(self):
         while not self.touchDown():
-            self.playerRect.y += 1
+            self.player.Rect.y += 1

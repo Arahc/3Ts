@@ -3,6 +3,7 @@ from GameSettings import *
 from SettingPage import SettingPage
 from MapPage import MapPage
 from Utility import BgmPlayer, Scene
+from Player import Player
 
 class GameManager():
 
@@ -10,10 +11,11 @@ class GameManager():
         global events, listeners
         self.window = window
         self.clock = pygame.time.Clock()
+        self.player = Player()
         self.menu = Menu.Menu(window)
         self.bgmplayer = BgmPlayer()
         self.settingpage = SettingPage(self.bgmplayer)
-        self.mappage = MapPage()
+        self.mappage = MapPage(self.player)
         self.chatboxes = { 'Seer': ChatBox.ChatBox('Seer') }
         listeners = [ self.menu ]
         events = []

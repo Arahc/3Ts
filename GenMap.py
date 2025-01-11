@@ -17,11 +17,13 @@ class GenMap():
         self.col = WindowSettings.width // MoveSettings.blockSize
         self.col *= 3
         
+
         # map1 是一个自定义地图，可以手动设置
         self.map1 = [[0 for i in range(self.col)] for j in range(self.row)] # 生成一个n*m的二维数组
         for j in range(self.col):
             self.map1[self.row - 1][j] = 1
-
+        self.ChestMoney = [[0 for i in range(self.col)] for j in range(self.row)]
+        
         # 随机生成地图
         # for i in range(80):
         #     x = random.randint(0, self.col - 1)
@@ -47,7 +49,6 @@ class GenMap():
         for i in range(0, self.col - 1, len1 * cnt1):
             GenTerrain1(i)
 
-        
         # GenChest 生成宝箱
         def GenChest():
             vec = []
@@ -57,6 +58,7 @@ class GenMap():
                         vec.append((i, j))
             random.shuffle(vec)
             self.map1[vec[0][0] - 1][vec[0][1]] = 2
+            self.ChestMoney[vec[0][0] - 1][vec[0][1]] = random.randint(20, 30)
         
         for i in range(10):
             GenChest()

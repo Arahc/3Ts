@@ -41,3 +41,5 @@ qty:
 
 - 完成了 `chatbox` （对话框）的制作
 - 实现了 AI 驱动 npc 进行对话
+- 新增了打开箱子的效果，现在可以获得钱了
+- 整理了 `MapPage.py`，将其中和 `Player` 有关的部分提出为 `Player.py`
