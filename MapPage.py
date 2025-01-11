@@ -9,16 +9,14 @@ class MapPage(Scene):
     def __init__(self, player, id):
         self.maper = GenMap()
         self.player = player
+        self.mapId = id
         self.SetMap(id)
         self.SetMove()
 
         # 设置 NPC
-        if (id == 1):
-            Seer=Npc('Seer', r'.\assets\npc\Seer.png', width = 90, height = 90,
-                        posX = 0, posY = self.mapHeight - self.blockSize - 90)
-            self.npcs=[Seer]
-        else:
-            self.npcs = []
+        Seer=Npc('Seer', r'.\assets\npc\Seer.png', width = 90, height = 90,
+                    posX = 0, posY = self.mapHeight - self.blockSize - 90)
+        self.npcs=[Seer]
 
     # 设置地图
     def SetMap(self, id):
@@ -77,6 +75,37 @@ class MapPage(Scene):
                 self.mapRect[i][j] = self.imgMap[i][j].get_rect()
                 self.mapRect[i][j].x = j * self.blockSize
                 self.mapRect[i][j].y = i * self.blockSize
+    
+    def reborn(self, id):
+        # 还原地图
+        blocks = [
+            r".\assets\map\air.png",
+            r".\assets\map\road.png",
+            r".\assets\map\chest.png",
+            r".\assets\map\trap.png",
+            r".\assets\map\benchL.png",
+            r".\assets\map\benchR.png",
+        ]
+        self.mapDelta = 0  # 地图移动距离
+        self.ChestMoney = self.maper.ChestMoney[id]
+        for i in range(self.maper.row):
+            for j in range(self.maper.col):
+                self.imgMap[i][j] = pygame.image.load(blocks[self.numMap[i][j]])
+                self.imgMap[i][j] = pygame.transform.scale(
+                    self.imgMap[i][j], (self.blockSize, self.blockSize)
+                )
+                # window.blit(self.imgMap[i][j], (j * self.blockSize, i * self.blockSize))
+                self.mapRect[i][j] = self.imgMap[i][j].get_rect()
+                self.mapRect[i][j].x = j * self.blockSize
+                self.mapRect[i][j].y = i * self.blockSize
+        # 还原人物
+        self.jumpTime = self.fallTime = self.lastDeltaY = self.deltaY = 0
+        self.falling = False
+        self.player.isDashing = False
+        self.player.onJump = False
+        self.Dashavailable = True  # 冲刺是否可用
+        self.dashTimer = 0  # 用于记录冲刺时间
+        self.player.Rect.x = self.player.Rect.y = 0 # 还原坐标，从屏幕左上角降落
 
     # 设置移动
     def SetMove(self):
@@ -168,10 +197,13 @@ class MapPage(Scene):
                     self.player.frame = 0
                 else:
                     self.player.frame = (self.player.frame + 1) % 8
+        
+        print(self.onSide())
 
         # 判断是否碰到陷阱
-        if (self.touchDown() == 3) or (self.touchUp() == 3) or (self.touchSide() == 3):
+        if (self.touchDown() == 3) or (self.touchUp() == 3) or (self.onSide() == 3):
             print("You fell into trap. Please try again.")
+            self.reborn(self.mapId)
 
         # 判断是否开始冲刺
         if keys[pygame.K_l] and (not self.player.isDashing) and (self.Dashavailable):
@@ -261,10 +293,24 @@ class MapPage(Scene):
                 if (
                     self.IsEntity[i][j] == True
                     and self.player.Rect.colliderect(self.mapRect[i][j])
-                    and not self.mapRect[i][j].y
-                    >= self.player.Rect.y + self.player.height - 1
+                    and not self.mapRect[i][j].y >= self.player.Rect.y + self.player.height - 1
                 ):
                     return self.numMap[i][j]
+        return 0
+    
+    def onSide(self):  # 判断人旁边是否有墙（当人旁边是墙的时候，由于移动时候的设计，会自动远离1个像素）
+        self.player.Rect.x += 1
+        res = self.touchSide()
+        if res:
+            self.player.Rect.x -= 1
+            return res
+        
+        self.player.Rect.x -= 1
+        res = self.touchSide()
+        if self.touchSide():
+            self.player.Rect.x += 1
+            return res
+        
         return 0
 
     def moveMap(self, sgnx):
