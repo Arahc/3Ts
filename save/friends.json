@@ -1,0 +1,55 @@
+{
+    "Friends":[
+        {
+            "ID":"fr0",
+            "name":"Filip",
+            "HP":20,
+            "maxHP":35,
+            "SP":7,
+            "SPHeal":2,
+            "maxSP":10,
+            "cards":[
+                {
+                    "ID":"0-1",
+                    "title":"劈砍",
+                    "description":"",
+                    "gate":"nor",
+                    "type":"True",
+                    "level":1,
+                    "effects":[
+
+                    ],
+                    "imgLocation":"./assets/card/0-1.png"
+                },
+                {
+                    "ID":"0-2",
+                    "title":"横切",
+                    "description":"",
+                    "gate":"xnor",
+                    "type":"False",
+                    "level":100,
+                    "effects":[
+
+                    ],
+                    "imgLocation":"./assets/card/0-2.png"
+                },
+                {
+                    "ID":"0-3",
+                    "title":"突进",
+                    "description":"",
+                    "gate":"not",
+                    "type":"False",
+                    "level":1,
+                    "effects":[
+
+                    ],
+                    "imgLocation":"./assets/card/0-3.png"
+                }
+            ],
+            "imgLocation":"./assets/char/fr-0",
+            "imgSize": [40, 80],
+            "imgDashSize": [100, 65],
+            "imgAttackSize": [150, 100]
+        }
+    ]
+}

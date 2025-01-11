@@ -1,22 +1,43 @@
 import sys
+from Img import Img
+from Character import Character, copyCharacter, clashCalculate
+from Animation import Sleep, moveAnimation
+from mouseSelect import mouseLeftButton, mouseMove
 import pygame as pg
-import saveSet as svst
 import screenPainter as scpt
-import copy
-from cardBattle import cardAttack, TrashCard, Character, clashDealing
+from Clash import Done, clashState1, clashState2, clashState3, clashState4, clashState5
 
-gSet = sys.modules['__main__'].__dict__ # global settings
+gSet = sys.modules['__main__'].__dict__
 
-selectedCards = set()
-hoveredCards = None
-selectedFriendCard = None
+def mainInit():
+    """
+    Initialize the important datas
+    - gSet['screen']
+        - sizes
+        - window
+        - FPS
+        - title
+    - Sizes
+        - button
+            - turn end
+            - draw & undo
+        - card
+        - character
+    - colors
+        - font color
+        - HP
+        - SP
+        - card border
+    - fonts
+    """
 
-def rgb(r:int, g:int, b:int):
-    return r, g, b
-
-def systemInit():
-    # kether
-    gSet['cardSpace'] = 10
+    # screen
+    gSet['screenWidth'] = 1000
+    gSet['screenHeight'] = 650
+    gSet['screenSize'] = gSet['screenWidth'], gSet['screenHeight']
+    gSet['fps'] = 60
+    pg.display.set_caption("Oops! A battle.")
+    gSet['screen'] = pg.display.set_mode(gSet['screenSize'])
 
     # button sizes
     gSet['endTurnButtonWidth'] = 75
@@ -25,105 +46,124 @@ def systemInit():
     gSet['draw&undoButtonWidth'] = 180
     gSet['draw&undoButtonHeight'] = 75
     gSet['draw&undoButtonSize'] = gSet['draw&undoButtonWidth'], gSet['draw&undoButtonHeight']
+    gSet['cardWidth'] = 75
+    gSet['cardHeight'] = 75
+    gSet['cardSize'] = gSet['cardWidth'], gSet['cardHeight']
+
+    # character sizes
+    gSet['unitWidth'] = 40
+    gSet['unitHeight'] = 80
+    gSet['unitSize'] = gSet['unitWidth'], gSet['unitHeight']
 
     # colors
+    def rgb(r:int, g:int, b:int):
+        return r, g, b
     gSet['--font-color-light'] = rgb(242, 253, 255)
+    gSet['--font-color-yellow'] = rgb(255, 250, 205)
+    gSet['--font-color-grey'] = rgb(180, 180, 180)
     gSet['--HP-ground'] = rgb(0, 99, 29)
     gSet['--HP-front'] = rgb(0, 205, 102)
+    gSet['--HP-third'] = rgb(192, 255, 62)
     gSet['--SP-ground'] = rgb(25, 25, 112)
     gSet['--SP-front'] = rgb(65, 105, 225)
     gSet['--SP-third'] = rgb(120, 169, 255)
+    gSet['--Enemy-number-ground'] = rgb(72, 61, 139)
+    gSet['--Enemy-number-front'] = rgb(132, 112, 255)
     gSet['--select-card'] = rgb(252, 243, 207)
     gSet['--selected-card'] = rgb(245, 183, 177)
     gSet['--card-info-ground'] = rgb(31, 30, 51)
 
-def Initialization(screenWidth:int, screenHeight:int, bg_img_loaction:str, fps:int):
-    gSet['screenSize'] = screenWidth, screenHeight
-    gSet['screenWidth'] = screenWidth
-    gSet['screenHeight'] = screenHeight
-    gSet['bg_img'] = pg.image.load(bg_img_loaction)
-    gSet['fps'] = fps
+    # fonts
+    gSet['font-battleInfo'] = pg.font.Font("./assets/font/NotoSansCJKsc-Bold.otf", 20)
+    gSet['font-cardDetail'] = pg.font.Font("./assets/font/STKAITI.TTF", 24)
+    gSet['font-clashInfo-card'] = pg.font.Font("./assets/font/SourceHanSansSC-Regular-2.otf", 24)
+    gSet['font-clashInfo-number'] = pg.font.Font("./assets/font/Exo-SemiBold.ttf", 32)
 
-def mouseSelect(event:pg.event, friendUnit:Character, enemyUnit:Character):
-    global hoveredCards, selectedFriendCard
-    if event.type == pg.MOUSEMOTION:
-        hoveredCards = None
-        mousePos = event.pos
-        cardSpacing = gSet['cardSpace']
+    # others
+    gSet['cardSpace'] = 0
+    gSet['friendClashInfo'] = None
+    gSet['enemyClashInfo'] = None
 
-        for card in friendUnit.onHandCards + enemyUnit.onHandCards:
-            cardImg = pg.image.load(card.imgLocation).convert_alpha()
-            cardWidth, cardHeight = cardImg.get_size()
-            maxCardsPerRow = (gSet['screenWidth'] // 2 - 20) // (cardWidth + cardSpacing)  # 每行最多显示的卡牌数量
-            if card in friendUnit.onHandCards:
-                index = friendUnit.onHandCards.index(card)
-                row = index // maxCardsPerRow
-                col = index % maxCardsPerRow
-                x = 10 + col * (cardWidth + cardSpacing)
-                y = gSet['screenHeight'] - cardHeight - 10 - row * (cardHeight + cardSpacing)
-                if y < gSet['screenHeight'] - gSet['draw&undoButtonHeight'] - 20:
-                    y = gSet['screenHeight'] - gSet['draw&undoButtonHeight'] - 20 - cardHeight - row * (cardHeight + cardSpacing)
-            else:
-                index = enemyUnit.onHandCards.index(card)
-                row = index // maxCardsPerRow
-                col = index % maxCardsPerRow
-                x = gSet['screenWidth'] - (col + 1) * (cardWidth + cardSpacing)
-                y = gSet['screenHeight'] - cardHeight - 10 - row * (cardHeight + cardSpacing)
-                if y < gSet['screenHeight'] - gSet['draw&undoButtonHeight'] - 20:
-                    y = gSet['screenHeight'] - gSet['draw&undoButtonHeight'] - 20 - cardHeight - row * (cardHeight + cardSpacing)
+def pictureInit():
+    """
+    Initialize the pictures:
+    - Button
+        - turn end
+        - draw
+        - undo
+    """
 
-            card_rect = cardImg.get_rect(topleft=(x, y))
-            if card_rect.collidepoint(mousePos):
-                hoveredCards = card
-                break
+    gSet['turnButton'] = Img(img=pg.image.load('./assets/img/turn_end.png').convert_alpha(), size=gSet['endTurnButtonSize'], pos=(gSet['screenWidth'] // 2 - gSet['endTurnButtonWidth'] // 2, 10))
+    gSet['drawButton'] = Img(img=pg.image.load('./assets/img/draw_button.png').convert_alpha(), size=gSet['draw&undoButtonSize'], pos=(gSet['screenWidth'] // 2 - gSet['draw&undoButtonWidth'] // 2 - 90, gSet['screenHeight'] - gSet['draw&undoButtonHeight'] - 10))
+    gSet['undoButton'] = Img(img=pg.image.load('./assets/img/undo_button.png').convert_alpha(), size=gSet['draw&undoButtonSize'], pos=(gSet['screenWidth'] // 2 - gSet['draw&undoButtonWidth'] // 2 + 90, gSet['screenHeight'] - gSet['draw&undoButtonHeight'] - 10))
 
-    elif event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
-        if hoveredCards:
-            if hoveredCards in selectedCards:
-                selectedCards.remove(hoveredCards)
-            else:
-                if hoveredCards in friendUnit.onHandCards:
-                    if friendUnit.SP - friendUnit.SPlossThisTurn() > 0:
-                        if selectedFriendCard is None:
-                            selectedFriendCard = hoveredCards
-                            selectedCards.add(hoveredCards)
-                        elif selectedFriendCard == hoveredCards:
-                            selectedFriendCard = None
-                            selectedCards.remove(hoveredCards)
-                else:
-                    selectedCards.add(hoveredCards)
-            checkCardSelection(friendUnit, enemyUnit)
+def friendInit(friendID:str):
+    """
+    Initialize friend data
+    """
 
-def checkCardSelection(friendUnit:Character, enemyUnit:Character):
-    global selectedFriendCard, selectedCards
-    if selectedFriendCard is None:
-        return
+    from saveSet import friendSettings
+    Friends = friendSettings(location="./save/friends.json", picPosition=(gSet['screenWidth'] // 5 - gSet['unitWidth'] // 2, gSet['screenHeight'] // 2 - gSet['unitHeight'] // 2 + 100))
 
-    gate = selectedFriendCard.gate
-    if gate == 'not' and len(selectedCards) == 2:
-        enemyCard = next(card for card in selectedCards if card != selectedFriendCard)
-        newCard = cardAttack(gate, selectedFriendCard, enemyCard)
-        enemyUnit.onHandCards.append(newCard)
-        friendUnit.useCard(selectedFriendCard)
-        enemyUnit.lostCard(enemyCard)
-        selectedCards.clear()
-        selectedFriendCard = None
-    elif gate in ['and', 'or', 'xor'] and len(selectedCards) == 3:
-        enemyCards = [card for card in selectedCards if card != selectedFriendCard]
-        newCard = cardAttack(gate, selectedFriendCard, enemyCards[0], enemyCards[1])
-        enemyUnit.onHandCards.append(newCard)
-        friendUnit.useCard(selectedFriendCard)
-        enemyUnit.lostCard(enemyCards[0])
-        enemyUnit.lostCard(enemyCards[1])
-        selectedCards.clear()
-        selectedFriendCard = None
+    gSet['friendUnit'] = Friends[0]
+    for friend in Friends:
+        if friend.ID == friendID:
+            gSet['friendUnit'] = friend
+            break
+
+def reloadEnemyCards(enemyUnit:Character, strategies:list):
+    import random
+    strategy = random.choice(strategies)
+    cards = []
+    for card in enemyUnit.cards:
+        if card.ID in strategy:
+            cards.append(card)
+    random.shuffle(cards)
+    enemyUnit.directLoad(cards=cards)
+
+def loadLevel(level:int):
+    """
+    Load level file. Get enemy data and BG
+    """
+
+    from saveSet import readLevel
+    bgImgLocation, Enemies = readLevel(location=f"./save/level{level}.json", picPosition=(4 * gSet['screenWidth'] // 5 - gSet['unitWidth'] // 2, gSet['screenHeight'] // 2 - gSet['unitHeight'] // 2 + 100))
+
+    gSet['background'] = Img(img=pg.image.load(bgImgLocation), size=gSet['screenSize'], pos=(0, 0))
+    gSet['enemyUnits'] = Enemies
+    gSet['enemyUnit'] = Enemies[0][0]
+    gSet['enemyStrategy'] = Enemies[0][1]
+    gSet['enemyUnitID'] = 0
+    reloadEnemyCards(enemyUnit=gSet['enemyUnit'], strategies=gSet['enemyStrategy'])
 
 recordedTurnState = None
 def recordTurnState(friendUnit:Character, enemyUnit:Character):
+    """
+    Record the state when a turn start.
+    """
+
+    import copy
     global recordedTurnState
     recordedTurnState = copy.deepcopy([friendUnit, enemyUnit])
 
+def undoTurn():
+    """
+    When the player uses Undo, roll the recorded state back.
+    """
+
+    global recordedTurnState
+    return copyCharacter(recordedTurnState[0]), copyCharacter(recordedTurnState[1])
+
 def endTurn(friendUnit:Character, enemyUnit:Character):
+    """
+    Deal with the things when a turn end despite clash.
+    Mainly to clear the state
+    """
+
+    # Clear the attack time
+    from mouseSelect import attackClear
+    attackClear()
+
     # Clear the cards that are used or cancelled this turn
     friendUnit.SP -= friendUnit.SPlossThisTurn()
     enemyUnit.SP -= enemyUnit.SPlossThisTurn()
@@ -134,79 +174,185 @@ def endTurn(friendUnit:Character, enemyUnit:Character):
     friendUnit.lostThisTurn.clear()
     enemyUnit.lostThisTurn.clear()
 
+    friendUnit.HPlossThisTurn = 0
+    enemyUnit.HPlossThisTurn = 0
+
     # Heal SP
     friendUnit.SP += friendUnit.SPHeal
     if friendUnit.SP > friendUnit.maxSP:
         friendUnit.SP = friendUnit.maxSP
-    enemyUnit.SP += enemyUnit.SPHeal
-    if enemyUnit.SP > enemyUnit.maxSP:
-        enemyUnit.SP = enemyUnit.maxSP
 
-    # Deal with clash
-    clashDealing(friendUnit=friendUnit,enemyUnit=enemyUnit)
+def cardInfoDeal(friendUnit:Character, enemyUnit:Character):
+    from mouseSelect import data
+    selectedCards = data("selectedCards")
+    hoveredCards = data("hoveredCards")
+    hoveredCardPos = data("hoveredCardPos")
+    selectedFriendCard = data("selectedFriendCard")
 
-    # refresh the record of the turn state
-    recordTurnState(friendUnit, enemyUnit)
+    scpt.drawCardBorders(friendUnit=friendUnit, enemyUnit=enemyUnit, selectedCards=selectedCards, hoveredCards=hoveredCards)
+    if hoveredCards is not None:
+        cardFrom = (True if hoveredCardPos[0] < gSet['screenWidth'] // 2 else False)
+        scpt.drawCardDetail(card=hoveredCards, cardFrom=cardFrom)
+        if not cardFrom and selectedFriendCard is not None:
+            scpt.drawCardDetail(card=selectedFriendCard, cardFrom=True)
+    elif selectedFriendCard is not None:
+        scpt.drawCardDetail(card=selectedFriendCard, cardFrom=True)
 
-def drawCard(friendUnit:Character):
-    if friendUnit.SP - friendUnit.SPlossThisTurn() > 0:
-        newCard = friendUnit.getCard()
+Animations = []
 
-def undoTurn():
-    global recordedTurnState
-    return copy.deepcopy(recordedTurnState)
-
-def main():
+def main(Level:int = 0, FriendID:str = "fr0"):
     pg.init()
-    systemInit()
-    pg.display.set_caption("Oops! A battle.")
-    FriendUnit, EnemyUnit = svst.readSettings(location="./save/1.json", willModify=True)
-    recordTurnState(FriendUnit, EnemyUnit)
-    gSet['friendUnit'] = FriendUnit
-    gSet['enemyUnit'] = EnemyUnit
+    mainInit()
+    
+    pictureInit()
+    friendInit(friendID=FriendID)
+    loadLevel(level=Level)
+    FriendUnit = copyCharacter(gSet['friendUnit'])
+    EnemyUnit = copyCharacter(gSet['enemyUnit'])
 
-    clock = pg.time.Clock()
-    Screen = pg.display.set_mode(gSet['screenSize'], pg.RESIZABLE)
     run = True
+
+    global Animations
+    Animations.append(moveAnimation(object=FriendUnit.imgDash, animateSeconds=0.3, nowPos=(-FriendUnit.img.width, FriendUnit.img.y), endPos=(FriendUnit.img.pos[0] + (FriendUnit.img.width - FriendUnit.imgDash.width), FriendUnit.img.pos[1]), name="FriendUnitIn"))
+    Animations.append(moveAnimation(object=EnemyUnit.imgDash, animateSeconds=0.3, nowPos=(gSet['screenWidth'], EnemyUnit.img.y), endPos=EnemyUnit.img.pos, name="EnemyUnitIn"))
+
+    recordTurnState(FriendUnit, EnemyUnit)
+    clock = pg.time.Clock()
+    clock.tick(gSet['fps'])
+
+    FriendUnit.showImg = FriendUnit.imgDash
+    EnemyUnit.showImg = EnemyUnit.imgDash
+
+    inClash = False
+    clashDoneThisFrame = False
+
     while run:
+        for animation in Animations:
+            if animation.update():
+                Animations.remove(animation)
+                # Battle Start
+                if animation.name == "FriendUnitIn":
+                    FriendUnit.showImg = FriendUnit.img
+                elif animation.name == "EnemyUnitIn":
+                    EnemyUnit.showImg = EnemyUnit.img
+                
+                # Clash
+                elif animation.name == "FriendClash1":
+                    FriendUnit.showImg = FriendUnit.img
+                    if Done():
+                        clashState2(Animations=Animations, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+                elif animation.name == "EnemyClash1":
+                    EnemyUnit.showImg = EnemyUnit.img
+                    if Done():
+                        clashState2(Animations=Animations, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+                elif animation.name == "friendClash2InfoFadeIn":
+                    if Done():
+                        Animations.append(Sleep(seconds=0.5, name="Clash2"))
+                elif animation.name == "enemyClash2InfoFadeIn":
+                    if Done():
+                        Animations.append(Sleep(seconds=0.5, name="Clash2"))
+                elif animation.name == "Clash2":
+                    gSet['friendClashInfo'] = None
+                    gSet['enemyClashInfo'] = None
+                    clashState3(Animations=Animations, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+                elif animation.name == "Clash3":
+                    clashState4(Animations=Animations, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+                elif animation.name == "friendClash4InfoFadeIn":
+                    if Done():
+                        Animations.append(Sleep(seconds=0.5, name="Clash4"))
+                elif animation.name == "enemyClash4InfoFadeIn":
+                    if Done():
+                        Animations.append(Sleep(seconds=0.5, name="Clash4"))
+                elif animation.name == "Clash4":
+                    gSet['friendClashInfo'] = None
+                    gSet['enemyClashInfo'] = None
+                    clashState5(Animations=Animations, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+                elif animation.name == "FriendClash5":
+                    FriendUnit.showImg = FriendUnit.img
+                    if Done():
+                        clashDoneThisFrame = True
+                elif animation.name == "EnemyClash5":
+                    EnemyUnit.showImg = EnemyUnit.img
+                    if Done():
+                        clashDoneThisFrame = True
+
+        if clashDoneThisFrame:
+            inClash = False
+            clashDoneThisFrame = False
+            FriendUnit.HP -= FriendUnit.HPlossThisTurn
+            FriendUnit.HPlossThisTurn = 0
+            EnemyUnit.HP -= EnemyUnit.HPlossThisTurn
+            EnemyUnit.HPlossThisTurn = 0
+            if FriendUnit.HP == 0:
+
+                print('WA')
+
+                run = False
+                break
+            elif EnemyUnit.HP == 0:
+                gSet['enemyUnitID'] += 1
+                if gSet['enemyUnitID'] == len(gSet['enemyUnits']):
+
+                    print('AC')
+
+                    run = False
+                    break
+                else:
+                    gSet['enemyUnit'] = gSet['enemyUnits'][gSet['enemyUnitID']][0]
+                    gSet['enemyStrategy'] = gSet['enemyUnits'][gSet['enemyUnitID']][1]
+                    reloadEnemyCards(enemyUnit=gSet['enemyUnit'], strategies=gSet['enemyStrategy'])
+                    EnemyUnit = gSet['enemyUnit']
+                    recordTurnState(FriendUnit, EnemyUnit)
+            else:
+                reloadEnemyCards(enemyUnit=gSet['enemyUnit'], strategies=gSet['enemyStrategy'])
+                EnemyUnit = gSet['enemyUnit']
+                recordTurnState(FriendUnit, EnemyUnit)
+
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
                 sys.exit()
-            elif event.type == pg.VIDEORESIZE:
-                gSet['screenSize'] = gSet['screenWidth'], gSet['screenHeight'] = event.size[0], event.size[1]
-                Screen = pg.display.set_mode(gSet['screenSize'], pg.RESIZABLE)
-            elif event.type == pg.MOUSEBUTTONDOWN:
-                # Select a card
-                mouseSelect(event, FriendUnit, EnemyUnit)
+            # elif event.type == pg.VIDEORESIZE:
+            #     gSet['screenSize'] = gSet['screenWidth'], gSet['screenHeight'] = event.size[0], event.size[1]
+            #     gSet['screen'] = pg.display.set_mode(gSet['screenSize'])
+            elif not inClash:
+                if event.type == pg.MOUSEMOTION:
+                    mouseMove(event=event, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+                elif event.type == pg.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        button = mouseLeftButton(event=event, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+                        if button == "":
+                            pass
+                        elif button == "End":
+                            endTurn(friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+                            inClash = True
+                            clashState1(Animations=Animations, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+                        elif button == "Draw":
+                            FriendUnit.getCard()
+                        elif button == "Undo":
+                            FriendUnit, EnemyUnit = undoTurn()
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_SPACE:
+                        endTurn(friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+                        inClash = True
+                        clashState1(Animations=Animations, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+        if not run:
+            break
 
-                # Click the end turn button
-                turnEndImgRect = pg.Rect(gSet['screenWidth'] // 2 - gSet['endTurnButtonWidth'] // 2, 10, gSet['endTurnButtonWidth'], gSet['endTurnButtonHeight'])
-                if turnEndImgRect.collidepoint(event.pos):
-                    endTurn(friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+        gSet['screen'].blit(gSet['background'].img, gSet['background'].pos)
+        scpt.drawBattleInfo(friendUnit=FriendUnit, enemyUnit=EnemyUnit, enemyID=gSet['enemyUnitID'], enemyNumber=len(gSet['enemyUnits']))
+        scpt.drawUnits(friend=FriendUnit.showImg, enemy=EnemyUnit.showImg)
+        scpt.drawCards(friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+        cardInfoDeal(friendUnit=FriendUnit, enemyUnit=EnemyUnit)
+        if inClash:
+            if gSet['friendClashInfo'] is not None:
+                gSet['screen'].blit(gSet['friendClashInfo'].img, gSet['friendClashInfo'].pos)
+            if gSet['enemyClashInfo'] is not None:
+                gSet['screen'].blit(gSet['enemyClashInfo'].img, gSet['enemyClashInfo'].pos)
 
-                # Click the draw button
-                drawImgRect = pg.Rect(gSet['screenWidth'] // 2 - gSet['draw&undoButtonWidth'] // 2 - 90, gSet['screenHeight'] - gSet['draw&undoButtonHeight'] - 10, gSet['draw&undoButtonWidth'], gSet['draw&undoButtonHeight'])
-                if drawImgRect.collidepoint(event.pos):
-                    drawCard(friendUnit=FriendUnit)
-
-                # Click the undo button
-                undoImgRect = pg.Rect(gSet['screenWidth'] // 2 - gSet['draw&undoButtonWidth'] // 2 + 90, gSet['screenHeight'] - gSet['draw&undoButtonHeight'] - 10, gSet['draw&undoButtonWidth'], gSet['draw&undoButtonHeight'])
-                if undoImgRect.collidepoint(event.pos):
-                    FriendUnit, EnemyUnit = undoTurn()
-    
-            elif event.type == pg.MOUSEMOTION:
-                mouseSelect(event, FriendUnit, EnemyUnit)
-            elif event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                endTurn(friendUnit=FriendUnit, enemyUnit=EnemyUnit)
-
-        Screen.blit(pg.transform.scale(gSet['bg_img'], gSet['screenSize']), (0, 0))
-        scpt.drawBattleInfo(screen=Screen, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
-        scpt.drawCards(screen=Screen, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
-        scpt.drawCardBorders(screen=Screen, friendUnit=FriendUnit, enemyUnit=EnemyUnit, selectedCards=selectedCards, hoveredCards=hoveredCards)
-        scpt.drawCardDetail(screen=Screen, card=hoveredCards)
         pg.display.flip()
         clock.tick(gSet['fps'])
+
 
 if __name__ == "__main__":
     main()
