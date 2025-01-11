@@ -174,36 +174,48 @@ class GenMap():
         len1 = 5 # 每段 5 块
         cnt1 = 3 # 3 段
         maxHeight1 = 2 # 相邻两段的最大落差
-        def GenTerrain1(x):
-            lastY = self.row // 2
+        def GenTerrain1(x, lastY):
             for i in range(cnt1):
                 l = max(lastY - maxHeight1, 3)
-                r = min(lastY + maxHeight1, self.row - 3) # 可以从最低的地面直接通过
+                r = min(lastY + maxHeight1, self.row - 4) # 可以从最低的地面直接通过
                 y = random.randint(l, r)
                 L = x + i * len1
                 R = min(self.col - 1, x + (i + 1) * len1 - 1)
                 for j in range(L, R):
                     self.Map[0][y][j] = 1
                 lastY = y
+            return lastY
 
-        for i in range(0, self.col, len1 * cnt1 + 2):
-            GenTerrain1(i)
 
-        # '''
-        # GenTerrain2 阶梯（上或下）
-        # '''
-        # def GenTerrain2(x):
-        #     cnt = random.randint(2, 5)
-        #     y = random.randint(cnt, self.row - cnt)
-        #     dy = random.randint(0, 1)
-        #     if dy == 0:
-        #         dy = -1
-        #     for i in range(cnt):
-        #         self.Map[0][y][x + i] = 1
-        #         y += dy
-        
-        # for i in range(5):
-        #     GenTerrain2(random.randint(5, self.col - 5))
+        lastY = self.row // 2
+        for i in range(0, self.col, len1 * cnt1 + 1):
+            lastY = GenTerrain1(i, lastY)
+
+        '''
+        GenTerrain2 阶梯（上或下）
+        '''
+        def GenTerrain2(x):
+            vec = []
+            for i in range(self.row):
+                for j in range(self.col - 1):
+                    if self.Map[0][i][j] == 1 and self.Map[0][i][j + 1] == 0:
+                        vec.append([i, j])
+            p = random.randint(0, len(vec) - 1)
+            cnt = random.randint(2, 3)
+            x = vec[p][0]
+            y = vec[p][1]
+            for i in range(cnt):
+                if x < 0 or y < 0 or x > self.row - 1 or y > self.col - 1:
+                    break
+                if (x > 1 and self.Map[0][x - 1][y] == 1) or (x < self.row - 1 and self.Map[0][x + 1][y] == 1):
+                    break
+                self.Map[0][x][y] = 1
+                x += 1
+                y += 1
+
+        for i in range(5):
+            GenTerrain2(random.randint(10, self.col - 5))
+
 
         '''
         GenChest 生成宝箱
