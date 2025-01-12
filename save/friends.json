@@ -113,6 +113,69 @@
             "imgSize": [40, 80],
             "imgDashSize": [100, 65],
             "imgAttackSize": [150, 100]
+        },
+        {
+            "ID":"fr2",
+            "name":"小骑士",
+            "HP":20,
+            "maxHP":20,
+            "SP":7,
+            "SPHeal":2,
+            "maxSP":10,
+            "cards":[
+                {
+                    "ID":"A-1",
+                    "title":"如丝之歌",
+                    "description":"",
+                    "gate":"or",
+                    "type":"True",
+                    "level":1,
+                    "effects":[
+
+                    ],
+                    "imgLocation":"./assets/card/A-1.png"
+                },
+                {
+                    "ID":"A-2",
+                    "title":"怒刃解放",
+                    "description":"",
+                    "gate":"not",
+                    "type":"False",
+                    "level":2,
+                    "effects":[
+
+                    ],
+                    "imgLocation":"./assets/card/A-2.png"
+                },
+                {
+                    "ID":"A-3",
+                    "title":"迅猛下劈",
+                    "description":"",
+                    "gate":"nor",
+                    "type":"False",
+                    "level":1,
+                    "effects":[
+
+                    ],
+                    "imgLocation":"./assets/card/A-3.png"
+                },
+                {
+                    "ID":"A-4",
+                    "title":"灵魂逆流",
+                    "description":"",
+                    "gate":"nand",
+                    "type":"True",
+                    "level":2,
+                    "effects":[
+
+                    ],
+                    "imgLocation":"./assets/card/A-4.png"
+                }
+            ],
+            "imgLocation":"./assets/char/fr-0",
+            "imgSize": [40, 80],
+            "imgDashSize": [100, 65],
+            "imgAttackSize": [150, 100]
         }
     ]
 }

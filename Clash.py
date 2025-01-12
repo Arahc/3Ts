@@ -83,18 +83,26 @@ def clashState1(Animations:list, friendUnit:Character, enemyUnit:Character):
     done = 0
     endPosFriend = (gSet['screenWidth'] // 2 - friendUnit.imgAttackYang.width + 25, friendUnit.img.y)
     endPosEnemy = (gSet['screenWidth'] // 2 - 25, enemyUnit.img.y)
+    if '(boss)' in enemyUnit.name:
+        endPosEnemy = enemyUnit.img.pos
     friendOriginPos = friendUnit.img.pos
     enemyOriginPos = enemyUnit.img.pos
     friendUnit.showImg = friendUnit.imgDash
     enemyUnit.showImg = enemyUnit.imgDash
+    if '(boss)' in enemyUnit.name:
+        enemyUnit.showImg = enemyUnit.img
     Animations.append(moveAnimation(object=friendUnit.imgDash, animateSeconds=0.5, nowPos=friendUnit.img.pos, endPos=endPosFriend, name="FriendClash1"))
-    Animations.append(moveAnimation(object=enemyUnit.imgDash, animateSeconds=0.5, nowPos=enemyUnit.img.pos, endPos=(endPosEnemy[0] + (enemyUnit.imgAttackYang.width - enemyUnit.imgDash.width) , endPosEnemy[1]), name="EnemyClash1"))
+    if '(boss)' in enemyUnit.name:
+        Animations.append(moveAnimation(object=enemyUnit.imgDash, animateSeconds=0.5, nowPos=enemyUnit.img.pos, endPos=enemyUnit.img.pos, name="EnemyClash1"))
+    else:
+        Animations.append(moveAnimation(object=enemyUnit.imgDash, animateSeconds=0.5, nowPos=enemyUnit.img.pos, endPos=(endPosEnemy[0] + (enemyUnit.imgAttackYang.width - enemyUnit.imgDash.width), endPosEnemy[1]), name="EnemyClash1"))
     friendUnit.img.setPos(endPosFriend)
     friendUnit.imgAttackYang.setPos(endPosFriend)
     friendUnit.imgAttackYin.setPos(endPosFriend)
-    enemyUnit.img.setPos((endPosEnemy[0] + (enemyUnit.imgAttackYang.width - enemyUnit.img.width), endPosEnemy[1]))
-    enemyUnit.imgAttackYang.setPos(endPosEnemy)
-    enemyUnit.imgAttackYin.setPos(endPosEnemy)
+    if '(boss)' not in enemyUnit.name:
+        enemyUnit.img.setPos((endPosEnemy[0] + (enemyUnit.imgAttackYang.width - enemyUnit.img.width), endPosEnemy[1]))
+        enemyUnit.imgAttackYang.setPos(endPosEnemy)
+        enemyUnit.imgAttackYin.setPos(endPosEnemy)
 
 def clashState2(Animations:list, friendUnit:Character, enemyUnit:Character):
     """
@@ -209,9 +217,12 @@ def clashState5(Animations:list, friendUnit:Character, enemyUnit:Character):
     friendUnit.showImg = friendUnit.img
     enemyUnit.showImg = enemyUnit.img
     Animations.append(moveAnimation(object=friendUnit.img, animateSeconds=0.1, nowPos=friendUnit.img.pos, endPos=friendEndPos, name="FriendClash5"))
-    Animations.append(moveAnimation(object=enemyUnit.img, animateSeconds=0.1, nowPos=enemyUnit.img.pos, endPos=enemyEndPos, name="EnemyClash5"))
+    if '(boss)' in enemyUnit.name:
+        Animations.append(moveAnimation(object=enemyUnit.imgDash, animateSeconds=0.5, nowPos=enemyUnit.img.pos, endPos=enemyUnit.img.pos, name="EnemyClash5"))
+    else:
+        Animations.append(moveAnimation(object=enemyUnit.img, animateSeconds=0.1, nowPos=enemyUnit.img.pos, endPos=enemyEndPos, name="EnemyClash5"))
     friendUnit.imgDash.setPos(friendEndPos)
     friendUnit.imgAttackYang.setPos(friendEndPos)
     friendUnit.imgAttackYin.setPos(friendEndPos)
-    enemyUnit.imgAttackYang.setPos(friendEndPos)
+    enemyUnit.imgAttackYang.setPos(enemyEndPos)
     enemyUnit.imgAttackYin.setPos(enemyEndPos)

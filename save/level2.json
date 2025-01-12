@@ -177,11 +177,11 @@
             ],
             "specialStrategy": {},
             "imgLocation":"./assets/char/en-2-1",
-            "posXoffset":0,
+            "posXoffset":-100,
             "posYoffset":-40,
             "imgSize": [350, 350],
             "imgDashSize": [350, 350],
-            "imgAttackSize": [270, 370]
+            "imgAttackSize": [300, 370]
         }
     ]
 }
