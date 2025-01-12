@@ -54,11 +54,11 @@
         {
             "ID":"fr1",
             "name":"小骑士",
-            "HP":20,
-            "maxHP":20,
-            "SP":7,
-            "SPHeal":2,
-            "maxSP":10,
+            "HP":10,
+            "maxHP":10,
+            "SP":4,
+            "SPHeal":1,
+            "maxSP":5,
             "cards":[
                 {
                     "ID":"A-1",

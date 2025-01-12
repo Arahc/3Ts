@@ -114,6 +114,12 @@ class GameManager():
                         status = battleController.main(Level = 0)
                     elif (value[1] == 'Boss'):
                         status = battleController.main(Level = 4)
+                    elif (value[1] == 'Enemy5'):
+                        ran=random.randint(0,1)
+                        if (ran == 0):
+                            status = battleController.main(Level = 1)
+                        else:
+                            status = battleController.main(Level = 3)
                     if (status == 'Lose'):
                         for listener in listeners:
                             if (isinstance(listener,MapPage)):
@@ -130,6 +136,11 @@ class GameManager():
                                 if (isinstance(listener,MapPage)):
                                     listener.isdead[1] = True
                             self.player.money += random.randint(40, 50)
+                        elif (value[1] == 'Enemy5'):
+                            for listener in listeners:
+                                if (isinstance(listener,MapPage)):
+                                    listener.isdead[0] = True
+                            self.player.money += random.randint(35, 45)
                         elif (value[1] == 'Enemy2'):
                             for listener in listeners:
                                 if (isinstance(listener,MapPage)):
@@ -143,7 +154,7 @@ class GameManager():
                         elif (value[1] == 'Enemy0'):
                             for listener in listeners:
                                 if (isinstance(listener,MapPage)):
-                                    listener.isdead[0] = True
+                                    listener.isdead[1] = True
                             self.player.money += random.randint(90, 100)
                         elif (value[1] == 'Boss'):
                             for listener in listeners:

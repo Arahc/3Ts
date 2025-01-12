@@ -108,13 +108,6 @@ def friendInit(friendID:str):
 
     gSet['friendUnit'] = Friends[0]
     for friend in Friends:
-        if len(friend.onHandCards) > 4: # At most 4 cards on hand at the beginning
-            import random
-            onHd = random.sample(friend.onHandCards, 4)
-            for card in friend.cards:
-                if card not in onHd:
-                    friend.unusedCards.append(card)
-            friend.onHandCards = onHd
         if friend.ID == friendID:
             friend.img.setPos((friend.img.x, friend.img.y - friend.img.height))
             friend.imgDash.setPos(friend.img.pos)

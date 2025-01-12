@@ -76,6 +76,18 @@ class MapPage(Scene):
 
     # 刷新 Npc
     def freshnpc(self, id):
+        if (id == 0):
+            if (self.isdead[0]):
+                for i in range(len(self.npcs)):
+                    if (self.npcs[i].name == 'Enemy5'):
+                        self.npcs.pop(i)
+                        break
+            if (self.isdead[1]):
+                for i in range(len(self.npcs)):
+                    if (self.npcs[i].name == 'Enemy0'):
+                        self.npcs.pop(i)
+                        break
+
         if (id == 1):
             if (self.isdead[0]):
                 for i in range(len(self.npcs)):
@@ -147,6 +159,17 @@ class MapPage(Scene):
         self.player.Rect.x = self.player.Rect.y = 0 # 还原坐标，从屏幕左上角降落
         
         self.npcs = []
+
+        if (id == 0):
+            if (not self.isdead[0]):
+                Enemy5 = Npc('Enemy5', r'.\assets\npc\enemy - 1.png', width = 56, height = 111,
+                            posX = 14 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 111)
+                self.npcs.append(Enemy5)
+            if (not self.isdead[1]):
+                Enemy0 = Npc('Enemy0', r'.\assets\npc\enemy - 0.png', width = 93, height = 108,
+                            posX = 6 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 108)
+                self.npcs.append(Enemy0)
+
         if (id == 1):
             Cornifer = Npc('Cornifer', r'.\assets\npc\Cornifer.png', width = 200, height = 100,
                         posX = 0, posY = self.mapHeight - self.blockSize - 100)
@@ -194,6 +217,17 @@ class MapPage(Scene):
     def SetNpc(self, id):
         self.npcs = []
         self.isdead = []
+        if (id == 0):
+            self.enemyNum = 2
+            self.isdead = [False for i in range(self.enemyNum)]
+            Enemy5 = Npc('Enemy5', r'.\assets\npc\enemy - 1.png', width = 56, height = 111,
+                        posX = 14 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 111)
+            self.npcs.append(Enemy5)
+
+            Enemy0 = Npc('Enemy0', r'.\assets\npc\enemy - 0.png', width = 93, height = 108,
+                        posX = 6 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 108)
+            self.npcs.append(Enemy0)
+
         if (id == 1):
             self.enemyNum = 3
             self.isdead = [False for i in range(self.enemyNum)]
@@ -315,6 +349,20 @@ class MapPage(Scene):
                         and (npc.name == "Boss")
                         and (not self.isdead[0])
                         and (self.mapid == 3)
+                    ):
+                        return ("EnterBattle",npc.name)
+                    if (
+                        (self.player.Rect.colliderect(npc.imageRect))
+                        and (npc.name == "Enemy5")
+                        and (not self.isdead[0])
+                        and (self.mapid == 0)
+                    ):
+                        return ("EnterBattle",npc.name)
+                    if (
+                        (self.player.Rect.colliderect(npc.imageRect))
+                        and (npc.name == "Enemy0")
+                        and (not self.isdead[1])
+                        and (self.mapid == 0)
                     ):
                         return ("EnterBattle",npc.name)
 

@@ -48,7 +48,7 @@
                     "description": "",
                     "gate": "nor",
                     "type": "True",
-                    "level": 1,
+                    "level": 2,
                     "effects": [],
                     "imgLocation": "./assets/card/1-1-4.png"
                 },
@@ -58,7 +58,7 @@
                     "description": "",
                     "gate": "xor",
                     "type": "True",
-                    "level": 3,
+                    "level": 4,
                     "effects": [],
                     "imgLocation": "./assets/card/1-1-5.png"
                 },
@@ -68,7 +68,7 @@
                     "description": "",
                     "gate": "xor",
                     "type": "False",
-                    "level": 3,
+                    "level": 4,
                     "effects": [],
                     "imgLocation": "./assets/card/1-1-6.png"
                 }

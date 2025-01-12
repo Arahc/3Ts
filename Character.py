@@ -35,11 +35,11 @@ class Character:
     def useCard(self, card:Card)->None:
         """
         Use a card.
-        If the card has effect "When used ...", apply the effect.
+        If the card has effect "When used ..." [time='use'], apply the effect.
         """
 
         for effect in card.effects:
-            pass
+            pass # TODO <------------------------------------------------------------------------------------------ apply the effect
         try:
             self.onHandCards.remove(card)
         except ValueError:
@@ -51,11 +51,11 @@ class Character:
     def lostCard(self, card:Card)->None:
         """
         Lost a card
-        If the card has effect "When lost ...", apply the effect.
+        If the card has effect "When lost ..." [time='lost'], apply the effect.
         """
 
         for effect in card.effects:
-            pass
+            pass # TODO <------------------------------------------------------------------------------------------ apply the effect
         try:
             self.onHandCards.remove(card)
         except ValueError:
@@ -66,7 +66,7 @@ class Character:
         import random
         """
         Get a card.
-        If the card has effect "When get ...", apply the effect.
+        If the card has effect "When get ..." [time='get'], apply the effect.
         If the character has no cards left, shuffle the used cards and set them as the cards of the character.
         If no used cards are left, or the character can't draw a card, return None
         """
@@ -81,7 +81,7 @@ class Character:
         card = random.choice(self.unusedCards)
         self.unusedCards.remove(card)
         for effect in card.effects:
-            pass
+            pass # TODO <------------------------------------------------------------------------------------------ apply the effect
         self.getThisTurn.append(card)
         self.onHandCards.append(card)
         return card
