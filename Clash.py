@@ -30,16 +30,27 @@ def cardInfoSurface(unit:Character, type:bool, color:tuple):
 
     width, height = 200, 0
 
-    total = sum(card.level for card in unit.onHandCards if card.type == type)
+    total = sum(card.level for card in unit.onHandCards if (card.type == type and "defence" not in card.effects))
     textTotal = gSet['font-clashInfo-number'].render(f'Total: {total}', True, color)
 
-    width = max(width, textTotal.get_width())
+    defence = sum(card.level for card in unit.onHandCards if (card.type == type and "defence" in card.effects))
+    textDefenceContent = ""
+    if defence > 0:
+        textDefenceContent = f' +({defence})'
+    textDefence = gSet['font-clashInfo-number'].render(textDefenceContent, True, gSet['--font-color-light'])
+
+    width = max(width, textTotal.get_width() + textDefence.get_width())
     height = textTotal.get_height() + 5
 
     textCards = []
     for card in unit.onHandCards:
-        if card.type == type:
+        if card.type == type and "defence" not in card.effects:
             text = gSet['font-clashInfo-card'].render(f'{card.title}: {card.level}', True, gSet['--font-color-light'])
+            textCards.append(text)
+            width = max(width, text.get_width())
+            height += text.get_height()
+        elif card.type == type:
+            text = gSet['font-clashInfo-card'].render(f'{card.title}: {card.level} (防御)', True, gSet['--font-color-light'])
             textCards.append(text)
             width = max(width, text.get_width())
             height += text.get_height()
@@ -53,6 +64,7 @@ def cardInfoSurface(unit:Character, type:bool, color:tuple):
     pg.draw.rect(surface, bgColor, (0, 0, width, height))
 
     surface.blit(textTotal, (10, 10))
+    surface.blit(textDefence, (10 + textTotal.get_width(), 10))
     yOffset = textTotal.get_height() + 5
     for text in textCards:
         surface.blit(text, (10, yOffset))
@@ -100,21 +112,21 @@ def clashState2(Animations:list, friendUnit:Character, enemyUnit:Character):
     done = 0
     friendUnit.showImg = friendUnit.imgAttackYang
     enemyUnit.showImg = enemyUnit.imgAttackYang
-    friendLevel = sum(card.level for card in friendUnit.onHandCards if card.type)
-    enemyLevel = sum(card.level for card in enemyUnit.onHandCards if card.type)
+    friendLevel = sum(card.level for card in friendUnit.onHandCards if (card.type and "defence" not in card.effects))
+    enemyLevel = sum(card.level for card in enemyUnit.onHandCards if (card.type and "defence" not in card.effects))
 
     friendCardInfo = cardInfoSurface(friendUnit, type=True, color=(gSet['--font-color-yellow'] if friendLevel > enemyLevel else gSet['--font-color-grey']))
     enemyCardInfo = cardInfoSurface(enemyUnit, type=True, color=(gSet['--font-color-yellow'] if friendLevel < enemyLevel else gSet['--font-color-grey']))
 
-    posY = min(friendUnit.img.y - friendCardInfo.get_height() - 10, enemyUnit.img.y - enemyCardInfo.get_height() - 10) # ensure the card info is the same high (maybe more beautiful)
+    posY = max(min(friendUnit.img.y - friendCardInfo.get_height() - 10, enemyUnit.img.y - enemyCardInfo.get_height() - 10), 100) # ensure the card info is the same high (maybe more beautiful)
     friendCardInfoPos = (friendUnit.img.x - friendCardInfo.get_width() - 10, posY)
     enemyCardInfoPos = (enemyUnit.img.x + enemyUnit.img.width + 10, posY)
 
     gSet['friendClashInfo'] = Img(img=friendCardInfo, size=friendCardInfo.size, pos=friendCardInfoPos, alpha=0)
     gSet['enemyClashInfo'] = Img(img=enemyCardInfo, size=enemyCardInfo.size, pos=enemyCardInfoPos, alpha=0)
 
-    Animations.append(moveAnimation(object=gSet['friendClashInfo'], animateSeconds=0.2, nowPos=(gSet['friendClashInfo'].x - 75, gSet['friendClashInfo'].y), endPos=gSet['friendClashInfo'].pos, name="friendClash4InfoFadeIn"))
-    Animations.append(moveAnimation(object=gSet['enemyClashInfo'], animateSeconds=0.2, nowPos=(gSet['enemyClashInfo'].x + 75, gSet['enemyClashInfo'].y), endPos=gSet['enemyClashInfo'].pos, name="enemyClash4InfoFadeIn"))
+    Animations.append(moveAnimation(object=gSet['friendClashInfo'], animateSeconds=0.2, nowPos=(gSet['friendClashInfo'].x - 100, gSet['friendClashInfo'].y), endPos=gSet['friendClashInfo'].pos, name="friendClash4InfoFadeIn"))
+    Animations.append(moveAnimation(object=gSet['enemyClashInfo'], animateSeconds=0.2, nowPos=(gSet['enemyClashInfo'].x + 50, gSet['enemyClashInfo'].y), endPos=(gSet['enemyClashInfo'].x - 50, gSet['enemyClashInfo'].y), name="enemyClash4InfoFadeIn"))
 
     Animations.append(fadeAnimation(object=gSet['friendClashInfo'], animateSeconds=0.1, nowAlpha=0, endAlpha=255, name="friendClash2InfoFadeIn"))
     Animations.append(fadeAnimation(object=gSet['enemyClashInfo'], animateSeconds=0.1, nowAlpha=0, endAlpha=255, name="enemyClash2InfoFadeIn"))
@@ -124,16 +136,13 @@ def clashState2(Animations:list, friendUnit:Character, enemyUnit:Character):
     elif friendLevel < enemyLevel:
         damage = enemyLevel - friendLevel
         friendUnit.HPlossThisTurn += damage
-        if friendUnit.HPlossThisTurn > friendUnit.HP:
-            friendUnit.HPlossThisTurn = friendUnit.HP
-            return 2
     else:
         damage = friendLevel - enemyLevel
-        enemyUnit.HPlossThisTurn += damage
-        if enemyUnit.HPlossThisTurn > enemyUnit.HP:
-            enemyUnit.HPlossThisTurn = enemyUnit.HP
-            return 1
-    return 0
+        defence = sum(card.level for card in enemyUnit.onHandCards if (card.type and "defence" in card.effects))
+        if damage > 0 and damage - defence <= 0 and sum(1 for card in enemyUnit.onHandCards if (card.type and "hasCounterAttack" in card.effects)) > 0:
+            gSet['enemyUseSpecial'].append("counterAttack")
+        else:
+            enemyUnit.HPlossThisTurn += damage
 
 def clashState3(Animations:list, friendUnit:Character, enemyUnit:Character):
     """
@@ -147,10 +156,6 @@ def clashState3(Animations:list, friendUnit:Character, enemyUnit:Character):
 def clashState4(Animations:list, friendUnit:Character, enemyUnit:Character):
     """
     Calculate the yin level
-    The return value can be:
-    - 0: Simply HP, etc changed
-    - 1: The enemy died
-    - 2: The player died
     """
 
     global done
@@ -159,21 +164,21 @@ def clashState4(Animations:list, friendUnit:Character, enemyUnit:Character):
     done = 0
     friendUnit.showImg = friendUnit.imgAttackYin
     enemyUnit.showImg = enemyUnit.imgAttackYin
-    friendLevel = sum(card.level for card in friendUnit.onHandCards if not card.type)
-    enemyLevel = sum(card.level for card in enemyUnit.onHandCards if not card.type)
+    friendLevel = sum(card.level for card in friendUnit.onHandCards if (not card.type and "defence" not in card.effects))
+    enemyLevel = sum(card.level for card in enemyUnit.onHandCards if (not card.type and "defence" not in card.effects))
 
     friendCardInfo = cardInfoSurface(friendUnit, type=False, color=(gSet['--font-color-yellow'] if friendLevel > enemyLevel else gSet['--font-color-grey']))
     enemyCardInfo = cardInfoSurface(enemyUnit, type=False, color=(gSet['--font-color-yellow'] if friendLevel < enemyLevel else gSet['--font-color-grey']))
 
-    posY = min(friendUnit.img.y - friendCardInfo.get_height() - 10, enemyUnit.img.y - enemyCardInfo.get_height() - 10) # ensure the card info is the same high (maybe more beautiful)
+    posY = max(min(friendUnit.img.y - friendCardInfo.get_height() - 10, enemyUnit.img.y - enemyCardInfo.get_height() - 10), 100) # ensure the card info is the same high (maybe more beautiful)
     friendCardInfoPos = (friendUnit.img.x - friendCardInfo.get_width() - 10, posY)
     enemyCardInfoPos = (enemyUnit.img.x + enemyUnit.img.width + 10, posY)
 
     gSet['friendClashInfo'] = Img(img=friendCardInfo, size=friendCardInfo.size, pos=friendCardInfoPos, alpha=0)
     gSet['enemyClashInfo'] = Img(img=enemyCardInfo, size=enemyCardInfo.size, pos=enemyCardInfoPos, alpha=0)
 
-    Animations.append(moveAnimation(object=gSet['friendClashInfo'], animateSeconds=0.2, nowPos=(gSet['friendClashInfo'].x - 75, gSet['friendClashInfo'].y), endPos=gSet['friendClashInfo'].pos, name="friendClash4InfoFadeIn"))
-    Animations.append(moveAnimation(object=gSet['enemyClashInfo'], animateSeconds=0.2, nowPos=(gSet['enemyClashInfo'].x + 75, gSet['enemyClashInfo'].y), endPos=gSet['enemyClashInfo'].pos, name="enemyClash4InfoFadeIn"))
+    Animations.append(moveAnimation(object=gSet['friendClashInfo'], animateSeconds=0.2, nowPos=(gSet['friendClashInfo'].x - 100, gSet['friendClashInfo'].y), endPos=gSet['friendClashInfo'].pos, name="friendClash4InfoFadeIn"))
+    Animations.append(moveAnimation(object=gSet['enemyClashInfo'], animateSeconds=0.2, nowPos=(gSet['enemyClashInfo'].x + 50, gSet['enemyClashInfo'].y), endPos=(gSet['enemyClashInfo'].x - 50, gSet['enemyClashInfo'].y), name="enemyClash4InfoFadeIn"))
 
     Animations.append(fadeAnimation(object=gSet['friendClashInfo'], animateSeconds=0.2, nowAlpha=0, endAlpha=255, name="friendClash4InfoFadeIn"))
     Animations.append(fadeAnimation(object=gSet['enemyClashInfo'], animateSeconds=0.2, nowAlpha=0, endAlpha=255, name="enemyClash4InfoFadeIn"))
@@ -183,16 +188,13 @@ def clashState4(Animations:list, friendUnit:Character, enemyUnit:Character):
     elif friendLevel < enemyLevel:
         damage = enemyLevel - friendLevel
         friendUnit.HPlossThisTurn += damage
-        if friendUnit.HPlossThisTurn > friendUnit.HP:
-            friendUnit.HPlossThisTurn = friendUnit.HP
-            return 2
     else:
         damage = friendLevel - enemyLevel
-        enemyUnit.HPlossThisTurn += damage
-        if enemyUnit.HPlossThisTurn > enemyUnit.HP:
-            enemyUnit.HPlossThisTurn = enemyUnit.HP
-            return 1
-    return 0
+        defence = sum(card.level for card in enemyUnit.onHandCards if (not card.type and "defence" in card.effects))
+        if damage > 0 and damage - defence <= 0 and sum(1 for card in enemyUnit.onHandCards if (not card.type and "hasCounterAttack" in card.effects)) > 0:
+            gSet['enemyUseSpecial'].append("counterAttack")
+        else:
+            enemyUnit.HPlossThisTurn += damage
 
 def clashState5(Animations:list, friendUnit:Character, enemyUnit:Character):
     """

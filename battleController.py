@@ -1,6 +1,6 @@
 import sys
 from Img import Img
-from Character import Character, copyCharacter, clashCalculate
+from Character import Character, copyCharacter
 from Animation import Sleep, moveAnimation
 from mouseSelect import mouseLeftButton, mouseMove
 import pygame as pg
@@ -76,7 +76,7 @@ def mainInit():
     # fonts
     gSet['font-battleInfo'] = pg.font.Font("./assets/font/NotoSansCJKsc-Bold.otf", 20)
     gSet['font-cardDetail'] = pg.font.Font("./assets/font/STKAITI.TTF", 24)
-    gSet['font-clashInfo-card'] = pg.font.Font("./assets/font/SourceHanSansSC-Regular-2.otf", 24)
+    gSet['font-clashInfo-card'] = pg.font.Font("./assets/font/SourceHanSansSC-Regular-2.otf", 20)
     gSet['font-clashInfo-number'] = pg.font.Font("./assets/font/Exo-SemiBold.ttf", 32)
 
     # others
@@ -103,23 +103,38 @@ def friendInit(friendID:str):
     """
 
     from saveSet import friendSettings
-    Friends = friendSettings(location="./save/friends.json", picPosition=(gSet['screenWidth'] // 5 - gSet['unitWidth'] // 2, gSet['screenHeight'] // 2 - gSet['unitHeight'] // 2 + 100))
+    Friends = friendSettings(location="./save/friends.json", picPosition=(gSet['screenWidth'] // 5, gSet['screenHeight'] // 7 * 5))
 
     gSet['friendUnit'] = Friends[0]
     for friend in Friends:
         if friend.ID == friendID:
+            friend.img.setPos((friend.img.x, friend.img.y - friend.img.height))
+            friend.imgDash.setPos(friend.img.pos)
+            friend.imgAttackYang.setPos(friend.img.pos)
+            friend.imgAttackYin.setPos(friend.img.pos)
             gSet['friendUnit'] = friend
             break
 
-def reloadEnemyCards(enemyUnit:Character, strategies:list):
-    import random
-    strategy = random.choice(strategies)
+def reloadEnemyCards(enemyUnit:Character, strategies:list, specials:list):
     cards = []
-    for card in enemyUnit.cards:
-        if card.ID in strategy:
-            cards.append(card)
-    random.shuffle(cards)
-    enemyUnit.directLoad(cards=cards)
+    useNormal = True
+    for special in specials:
+        if special in gSet['enemyUseSpecial']:
+            useNormal = False
+            gSet['enemyUseSpecial'].remove(special)
+            if special == "counterAttack":
+                for card in enemyUnit.cards:
+                    if card.ID in gSet['enemySpecialStrategy']['counterAttack']:
+                        cards.append(card)
+                enemyUnit.directLoad(cards=cards)
+    if useNormal:
+        import random
+        strategy = random.choice(strategies)
+        for card in enemyUnit.cards:
+            if card.ID in strategy:
+                cards.append(card)
+        random.shuffle(cards)
+        enemyUnit.directLoad(cards=cards)
 
 def loadLevel(level:int):
     """
@@ -127,14 +142,32 @@ def loadLevel(level:int):
     """
 
     from saveSet import readLevel
-    bgImgLocation, Enemies = readLevel(location=f"./save/level{level}.json", picPosition=(4 * gSet['screenWidth'] // 5 - gSet['unitWidth'] // 2, gSet['screenHeight'] // 2 - gSet['unitHeight'] // 2 + 100))
+    bgImgLocation, yOff, Enemies = readLevel(location=f"./save/level{level}.json", picPosition=(gSet['screenWidth'] // 5 * 4, gSet['screenHeight'] // 7 * 5))
 
     gSet['background'] = Img(img=pg.image.load(bgImgLocation), size=gSet['screenSize'], pos=(0, 0))
-    gSet['enemyUnits'] = Enemies
+    gSet['enemyUnits'] = []
+    for enemy in Enemies:
+        if '(boss)' in enemy[0].name:
+            enemy[0].img.setPos((enemy[0].img.x, enemy[0].img.y - enemy[0].img.height))
+        else:
+            enemy[0].img.setPos((enemy[0].img.x - enemy[0].img.width, enemy[0].img.y - enemy[0].img.height))
+        enemy[0].imgDash.setPos(enemy[0].img.pos)
+        enemy[0].imgAttackYang.setPos(enemy[0].img.pos)
+        enemy[0].imgAttackYin.setPos(enemy[0].img.pos)
+        gSet['enemyUnits'].append(enemy)
+    
+    # fix the position of friend unit
+    gSet['friendUnit'].img.setPos((gSet['friendUnit'].img.x, gSet['friendUnit'].img.y + yOff))
+    gSet['friendUnit'].imgDash.setPos(gSet['friendUnit'].img.pos)
+    gSet['friendUnit'].imgAttackYang.setPos(gSet['friendUnit'].img.pos)
+    gSet['friendUnit'].imgAttackYin.setPos(gSet['friendUnit'].img.pos)
+
     gSet['enemyUnit'] = Enemies[0][0]
     gSet['enemyStrategy'] = Enemies[0][1]
+    gSet['enemySpecialStrategy'] = Enemies[0][2]
     gSet['enemyUnitID'] = 0
-    reloadEnemyCards(enemyUnit=gSet['enemyUnit'], strategies=gSet['enemyStrategy'])
+    gSet['enemyUseSpecial'] = []
+    reloadEnemyCards(enemyUnit=gSet['enemyUnit'], strategies=gSet['enemyStrategy'], specials=gSet['enemySpecialStrategy'])
 
 recordedTurnState = None
 def recordTurnState(friendUnit:Character, enemyUnit:Character):
@@ -174,9 +207,6 @@ def endTurn(friendUnit:Character, enemyUnit:Character):
     friendUnit.lostThisTurn.clear()
     enemyUnit.lostThisTurn.clear()
 
-    friendUnit.HPlossThisTurn = 0
-    enemyUnit.HPlossThisTurn = 0
-
     # Heal SP
     friendUnit.SP += friendUnit.SPHeal
     if friendUnit.SP > friendUnit.maxSP:
@@ -213,7 +243,7 @@ def main(Level:int = 0, FriendID:str = "fr0"):
     run = True
 
     global Animations
-    Animations.append(moveAnimation(object=FriendUnit.imgDash, animateSeconds=0.3, nowPos=(-FriendUnit.img.width, FriendUnit.img.y), endPos=(FriendUnit.img.pos[0] + (FriendUnit.img.width - FriendUnit.imgDash.width), FriendUnit.img.pos[1]), name="FriendUnitIn"))
+    Animations.append(moveAnimation(object=FriendUnit.imgDash, animateSeconds=0.3, nowPos=(-FriendUnit.img.width, FriendUnit.img.y), endPos=(FriendUnit.img.x + (FriendUnit.img.width - FriendUnit.imgDash.width), FriendUnit.img.y), name="FriendUnitIn"))
     Animations.append(moveAnimation(object=EnemyUnit.imgDash, animateSeconds=0.3, nowPos=(gSet['screenWidth'], EnemyUnit.img.y), endPos=EnemyUnit.img.pos, name="EnemyUnitIn"))
 
     recordTurnState(FriendUnit, EnemyUnit)
@@ -275,14 +305,39 @@ def main(Level:int = 0, FriendID:str = "fr0"):
                     EnemyUnit.showImg = EnemyUnit.img
                     if Done():
                         clashDoneThisFrame = True
+                elif animation.name == "deadEnemyUnitOut":
+                    if gSet['enemyUnitID'] == len(gSet['enemyUnits']):
+
+                        print('AC')
+
+                        run = False
+                        break
+                    else:
+                        gSet['enemyUnit'] = gSet['enemyUnits'][gSet['enemyUnitID']][0]
+                        gSet['enemyStrategy'] = gSet['enemyUnits'][gSet['enemyUnitID']][1]
+                        gSet['enemySpecialStrategy'] = gSet['enemyUnits'][gSet['enemyUnitID']][2]
+                        gSet['enemyUseSpecial'] = []
+                        reloadEnemyCards(enemyUnit=gSet['enemyUnit'], strategies=gSet['enemyStrategy'], specials=gSet['enemySpecialStrategy'])
+                        EnemyUnit = gSet['enemyUnit']
+                        EnemyUnit.showImg = EnemyUnit.imgDash
+                        Animations.append(moveAnimation(object=EnemyUnit.imgDash, animateSeconds=0.3, nowPos=(gSet['screenWidth'], EnemyUnit.img.y), endPos=EnemyUnit.img.pos, name="newEnemyUnitIn"))
+                elif animation.name == "newEnemyUnitIn":
+                    EnemyUnit.showImg = EnemyUnit.img
+                    recordTurnState(FriendUnit, EnemyUnit)
+        if not run:
+            break
 
         if clashDoneThisFrame:
             inClash = False
             clashDoneThisFrame = False
             FriendUnit.HP -= FriendUnit.HPlossThisTurn
             FriendUnit.HPlossThisTurn = 0
+            if FriendUnit.HP < 0:
+                FriendUnit.HP = 0
             EnemyUnit.HP -= EnemyUnit.HPlossThisTurn
             EnemyUnit.HPlossThisTurn = 0
+            if EnemyUnit.HP < 0:
+                EnemyUnit.HP = 0
             if FriendUnit.HP == 0:
 
                 print('WA')
@@ -291,21 +346,9 @@ def main(Level:int = 0, FriendID:str = "fr0"):
                 break
             elif EnemyUnit.HP == 0:
                 gSet['enemyUnitID'] += 1
-                if gSet['enemyUnitID'] == len(gSet['enemyUnits']):
-
-                    print('AC')
-
-                    run = False
-                    break
-                else:
-                    gSet['enemyUnit'] = gSet['enemyUnits'][gSet['enemyUnitID']][0]
-                    gSet['enemyStrategy'] = gSet['enemyUnits'][gSet['enemyUnitID']][1]
-                    reloadEnemyCards(enemyUnit=gSet['enemyUnit'], strategies=gSet['enemyStrategy'])
-                    EnemyUnit = gSet['enemyUnit']
-                    recordTurnState(FriendUnit, EnemyUnit)
+                Animations.append(moveAnimation(object=EnemyUnit.img, animateSeconds=0.3, nowPos=EnemyUnit.img.pos, endPos=(gSet['screenWidth'] + 10, EnemyUnit.img.y), name="deadEnemyUnitOut"))
             else:
-                reloadEnemyCards(enemyUnit=gSet['enemyUnit'], strategies=gSet['enemyStrategy'])
-                EnemyUnit = gSet['enemyUnit']
+                reloadEnemyCards(enemyUnit=EnemyUnit, strategies=gSet['enemyStrategy'], specials=gSet['enemySpecialStrategy'])
                 recordTurnState(FriendUnit, EnemyUnit)
 
         for event in pg.event.get():
@@ -355,4 +398,4 @@ def main(Level:int = 0, FriendID:str = "fr0"):
 
 
 if __name__ == "__main__":
-    main()
+    main(Level=1, FriendID="fr1")

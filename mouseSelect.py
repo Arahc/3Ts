@@ -93,6 +93,7 @@ def cardHover(mousePos:tuple, friendUnit:Character, enemyUnit:Character):
 def cardSelect(friendUnit:Character, enemyUnit:Character):
     """
     Check if the player select a card
+    The player cannot select a card which has effect "selectProhibit"
     """
 
     global hoveredCards, selectedFriendCard
@@ -111,7 +112,7 @@ def cardSelect(friendUnit:Character, enemyUnit:Character):
                     selectedCards.remove(selectedFriendCard)
                     selectedFriendCard = hoveredCards
                     selectedCards.add(hoveredCards)
-            elif selectedFriendCard is not None and hoveredCards in enemyUnit.onHandCards:
+            elif selectedFriendCard is not None and hoveredCards in enemyUnit.onHandCards and "selectProhibit" not in hoveredCards.effects:
                 if selectedFriendCard.gate == 'not' and len(selectedCards) == 1:
                     selectedCards.add(hoveredCards)
                     checkCardSelection(friendUnit, enemyUnit)

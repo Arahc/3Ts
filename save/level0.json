@@ -1,9 +1,11 @@
 {
-    "Background":"./assets/img/bg_img.png",
+    "Background":"./assets/img/bg_img_0.png",
+    "yOffset": 0,
     "Enemies":[
         {
             "ID":"en0-1",
             "name":"大黄蜂",
+            "type":"normal",
             "HP":400,
             "maxHP":750,
             "SP":70,
@@ -119,144 +121,13 @@
                     "0-1-6"
                 ]
             ],
+            "specialStrategy": {},
             "imgLocation":"./assets/char/en-0-1",
+            "posXoffset":0,
+            "posYoffset":0,
             "imgSize": [90, 100],
             "imgDashSize": [140, 90],
             "imgAttackSize": [180, 90]
-        },
-        {
-            "ID":"en0-2",
-            "name":"神父",
-            "HP":1500,
-            "maxHP":1500,
-            "SP":70,
-            "SPHeal":70,
-            "maxSP":70,
-            "cards":[
-                {
-                    "ID":"0-2-1",
-                    "title":"无法洗清的罪……",
-                    "description":"",
-                    "gate":"nor",
-                    "type":"True",
-                    "level":1,
-                    "effects":[
-
-                    ],
-                    "imgLocation":"./assets/card/0-2-1.png"
-                },
-                {
-                    "ID":"0-2-2",
-                    "title":"应得的惩罚……",
-                    "description":"",
-                    "gate":"nor",
-                    "type":"False",
-                    "level":1,
-                    "effects":[
-
-                    ],
-                    "imgLocation":"./assets/card/0-2-2.png"
-                },
-                {
-                    "ID":"0-2-3",
-                    "title":"今天有想过血吗？",
-                    "description":"",
-                    "gate":"nand",
-                    "type":"True",
-                    "level":1,
-                    "effects":[
-
-                    ],
-                    "imgLocation":"./assets/card/0-2-3.png"
-                },
-                {
-                    "ID":"0-2-4",
-                    "title":"还在想着血吗？",
-                    "description":"",
-                    "gate":"nand",
-                    "type":"False",
-                    "level":1,
-                    "effects":[
-
-                    ],
-                    "imgLocation":"./assets/card/0-2-4.png"
-                },
-                {
-                    "ID":"0-2-5",
-                    "title":"更多的血……！",
-                    "description":"",
-                    "gate":"not",
-                    "type":"True",
-                    "level":1,
-                    "effects":[
-
-                    ],
-                    "imgLocation":"./assets/card/0-2-5.png"
-                },
-                {
-                    "ID":"0-2-6",
-                    "title":"如此丰富……！",
-                    "description":"",
-                    "gate":"and",
-                    "type":"True",
-                    "level":1,
-                    "effects":[
-
-                    ],
-                    "imgLocation":"./assets/card/0-2-6.png"
-                },
-                {
-                    "ID":"0-2-7",
-                    "title":"更多的血……！",
-                    "description":"",
-                    "gate":"and",
-                    "type":"False",
-                    "level":1,
-                    "effects":[
-
-                    ],
-                    "imgLocation":"./assets/card/0-2-7.png"
-                }
-            ],
-            "strategy":[
-                [
-                    "0-2-1",
-                    "0-2-2",
-                    "0-2-3",
-                    "0-2-6",
-                    "0-2-7"
-                ],
-                [
-                    "0-2-1",
-                    "0-2-2",
-                    "0-2-3",
-                    "0-2-5",
-                    "0-2-6",
-                    "0-2-7"
-                ],
-                [
-                    "0-2-1",
-                    "0-2-2",
-                    "0-2-3",
-                    "0-2-4",
-                    "0-2-5",
-                    "0-2-6",
-                    "0-2-7"
-                ],
-                [
-                    "0-2-1",
-                    "0-2-2",
-                    "0-2-3",
-                    "0-2-4",
-                    "0-2-5",
-                    "0-2-6",
-                    "0-2-7"
-                ]
-            ],
-            "imgLocation":"./assets/char/en-0-2",
-            "imgSize": [40, 80],
-            "imgDashSize": [80, 80],
-            "imgAttackSize": [120, 80]
         }
     ]
 }

@@ -39,8 +39,7 @@ class Character:
         """
 
         for effect in card.effects:
-            if effect.time == 'use':
-                pass # TODO <------------------------------------------------------------------------------------------ apply the effect
+            pass # TODO <------------------------------------------------------------------------------------------ apply the effect
         try:
             self.onHandCards.remove(card)
         except ValueError:
@@ -56,8 +55,7 @@ class Character:
         """
 
         for effect in card.effects:
-            if effect.time == 'lost':
-                pass # TODO <------------------------------------------------------------------------------------------ apply the effect
+            pass # TODO <------------------------------------------------------------------------------------------ apply the effect
         try:
             self.onHandCards.remove(card)
         except ValueError:
@@ -83,8 +81,7 @@ class Character:
         card = random.choice(self.unusedCards)
         self.unusedCards.remove(card)
         for effect in card.effects:
-            if effect.time == 'get':
-                pass # TODO <------------------------------------------------------------------------------------------ apply the effect
+            pass # TODO <------------------------------------------------------------------------------------------ apply the effect
         self.getThisTurn.append(card)
         self.onHandCards.append(card)
         return card
@@ -114,49 +111,3 @@ def copyCharacter(char:Character):
 
     import copy
     return copy.deepcopy(char)
-
-def clashCalculate(friendUnit:Character, enemyUnit:Character):
-    """
-    Consider the levels of the cards of Yin and Yang, respectively.
-    If draw, nothing happen.
-    If one character wins, cause damage to another character.
-    """
-
-    friendYinLevel = 0
-    friendYangLevel = 0
-    for card in friendUnit.onHandCards:
-        if card.type:
-            friendYangLevel += card.level
-        else:
-            friendYinLevel += card.level
-    enemyYinLevel = 0
-    enemyYangLevel = 0
-    for card in enemyUnit.onHandCards:
-        if card.type:
-            enemyYangLevel += card.level
-        else:
-            enemyYinLevel += card.level
-    if friendYinLevel == enemyYinLevel:
-        pass
-    elif friendYinLevel < enemyYinLevel:
-        damage = enemyYinLevel - friendYinLevel
-        friendUnit.HP -= damage
-        if friendUnit.HP < 0:
-            friendUnit.HP = 0
-    else:
-        damage = friendYinLevel - enemyYinLevel
-        enemyUnit.HP -= damage
-        if enemyUnit.HP < 0:
-            enemyUnit.HP = 0
-    if friendYangLevel == enemyYangLevel:
-        pass
-    elif friendYangLevel < enemyYangLevel:
-        damage = enemyYangLevel - friendYangLevel
-        friendUnit.HP -= damage
-        if friendUnit.HP < 0:
-            friendUnit.HP = 0
-    else:
-        damage = friendYangLevel - enemyYangLevel
-        enemyUnit.HP -= damage
-        if enemyUnit.HP < 0:
-            enemyUnit.HP = 0

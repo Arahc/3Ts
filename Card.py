@@ -1,26 +1,6 @@
-class Effect:
-    def __init__(self, time:str, title:str, description:str, value:int, obj:object, fragile:bool):    
-        self.time = time
-        self.title = title
-        self.description = description
-        self.value = value
-        self.obj = obj
-        self.fragile = fragile
-
 class Card:
     from Img import Img
-    def __init__(self, ID:str, title:str, description:str, gate:str, type:bool, level:int, effects:list, img:Img):
-        """
-        ID: The id of the card. Unique for each card.
-        title: The title of the card.
-        description: The description of the card.
-        gate: The gate that the card is in. and/or/xor/not/nand/nor/xnor. Can be None if the card doesn't contain a gate.
-        type: True = Yang, False = Yin
-        level: The number of the number of the type (3 0s, etc.)
-        effects: The effects of the card. List of Effect objects.
-        imgLocation: The location of the image of the card.
-        """
-    
+    def __init__(self, ID:str, title:str, description:str, gate:str, type:bool, level:int, effects:list, img:Img):    
         self.ID = ID
         self.title = title
         self.description = description
@@ -54,7 +34,7 @@ def cardAttack(gate:str, card0:Card, card1:Card, card2:Card=None, time:int=0):
         resultCard.type = not card1.type
         resultCard.level = card1.level
         for effect in card1.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
     elif gate == 'and':
         if card2 is None:
@@ -62,10 +42,10 @@ def cardAttack(gate:str, card0:Card, card1:Card, card2:Card=None, time:int=0):
         resultCard.type = card1.type and card2.type
         resultCard.level = max(card1.level, card2.level)
         for effect in card1.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
         for effect in card2.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
     elif gate == 'or':
         if card2 is None:
@@ -73,10 +53,10 @@ def cardAttack(gate:str, card0:Card, card1:Card, card2:Card=None, time:int=0):
         resultCard.type = card1.type or card2.type
         resultCard.level = max(card1.level, card2.level)
         for effect in card1.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
         for effect in card2.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
     elif gate == 'xor':
         if card2 is None:
@@ -84,10 +64,10 @@ def cardAttack(gate:str, card0:Card, card1:Card, card2:Card=None, time:int=0):
         resultCard.type = card1.type != card2.type
         resultCard.level = max(card1.level, card2.level)
         for effect in card1.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
         for effect in card2.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
     elif gate == 'nand':
         if card2 is None:
@@ -95,10 +75,10 @@ def cardAttack(gate:str, card0:Card, card1:Card, card2:Card=None, time:int=0):
         resultCard.type = not (card1.type and card2.type)
         resultCard.level = max(card1.level, card2.level)
         for effect in card1.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
         for effect in card2.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
     elif gate == 'nor':
         if card2 is None:
@@ -106,10 +86,10 @@ def cardAttack(gate:str, card0:Card, card1:Card, card2:Card=None, time:int=0):
         resultCard.type = not (card1.type or card2.type)
         resultCard.level = max(card1.level, card2.level)
         for effect in card1.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
         for effect in card2.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
     elif gate == 'xnor':
         if card2 is None:
@@ -117,10 +97,10 @@ def cardAttack(gate:str, card0:Card, card1:Card, card2:Card=None, time:int=0):
         resultCard.type = not (card1.type != card2.type)
         resultCard.level = max(card1.level, card2.level)
         for effect in card1.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
         for effect in card2.effects:
-            if not effect.fragile:
+            if "fragile" not in effect:
                 resultCard.effects.append(effect)
     else:
         raise ValueError("Invalid gate: the gate does not exist")

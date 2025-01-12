@@ -24,7 +24,7 @@ def drawBattleInfo(friendUnit:Character, enemyUnit:Character, enemyID:int, enemy
     pg.draw.rect(gSet['screen'], gSet['--HP-ground'], (10, 10, barWidth, barHeight))
     pg.draw.rect(gSet['screen'], gSet['--HP-front'], (10, 10, barWidth * friendHPratio, barHeight))
     if friendUnit.HP > 0 and friendUnit.HPlossThisTurn > 0:
-        ratio = friendUnit.HPlossThisTurn / friendUnit.HP
+        ratio = min(friendUnit.HPlossThisTurn, friendUnit.HP) / friendUnit.HP
         usedWidth = barWidth * friendHPratio * ratio
         pg.draw.rect(
             gSet['screen'],
@@ -58,7 +58,7 @@ def drawBattleInfo(friendUnit:Character, enemyUnit:Character, enemyID:int, enemy
     pg.draw.rect(gSet['screen'], gSet['--HP-ground'], (gSet['screenWidth'] - barWidth - 10, 10, barWidth, barHeight))
     pg.draw.rect(gSet['screen'], gSet['--HP-front'], (gSet['screenWidth'] - barWidth - 10, 10, barWidth * enemyHPratio, barHeight))
     if enemyUnit.HP > 0 and enemyUnit.HPlossThisTurn > 0:
-        ratio = enemyUnit.HPlossThisTurn / enemyUnit.HP
+        ratio = min(enemyUnit.HPlossThisTurn, enemyUnit.HP) / enemyUnit.HP
         usedWidth = barWidth * enemyHPratio * ratio
         pg.draw.rect(
             gSet['screen'],
@@ -91,7 +91,7 @@ def drawBattleInfo(friendUnit:Character, enemyUnit:Character, enemyID:int, enemy
     if enemyUnit.HPlossThisTurn > 0:
         enemyHPtextContent += f' (-{enemyUnit.HPlossThisTurn})'
     enemyHPtext = gSet['font-battleInfo'].render(enemyHPtextContent, True, gSet['--font-color-light'])
-    enemyNMtextContent = f'击杀敌人数: {enemyID} / {enemyNumber}'
+    enemyNMtextContent = f'WAVE: {enemyID} / {enemyNumber}'
     if enemyUnit.SPlossThisTurn() > 0:
         enemyNMtextContent += f' (-{enemyUnit.SPlossThisTurn()})'
     enemyNMtext = gSet['font-battleInfo'].render(enemyNMtextContent, True, gSet['--font-color-light'])
@@ -217,10 +217,34 @@ def drawCardDetail(card: Card, cardFrom: bool): # True = friend | False = enemy
     else:
         x, y = gSet['screenWidth'] - gSet['screenWidth'] // 3 - 10, 70
 
-    backgroundHeight = len(cardInfo) * 24 + 10
     maxWidth = max(gSet['font-cardDetail'].size(line)[0] for line in cardInfo) + 20
+    maxWidth = min(maxWidth, 500)
+
+    def wrap(text:str, font:pg.Font, maxWidth:int):
+        """
+        Wrap text to fit within a given width when rendered with the specified font.
+        """
+        lines = []
+        current_line = ""
+        for char in text:
+            current_line += char
+            width, _ = font.size(current_line)
+            if width > maxWidth:
+                lines.append(current_line[:-1])
+                current_line = char
+        if current_line:
+            lines.append(current_line)
+        return lines
+
+    cardInfoNew = []
+    for line in cardInfo:
+        texts = wrap(text=line, font=gSet['font-cardDetail'], maxWidth=maxWidth)
+        cardInfoNew += texts
+    cardInfo = cardInfoNew
+    backgroundHeight = len(cardInfo) * 24 + 10
+
     backgroundRect = pg.Surface((maxWidth, backgroundHeight))
-    backgroundRect.set_alpha(178)
+    backgroundRect.set_alpha(255 * 0.7)
     backgroundRect.fill(gSet['--card-info-ground'])
 
     if not cardFrom:
