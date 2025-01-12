@@ -12,17 +12,7 @@ class MapPage(Scene):
         self.SetMap(id)
         self.mapid=id
         self.SetMove()
-
-        self.npcs = []
-        # 设置 NPC
-        if (id == 1):
-            Seer = Npc('Seer', r'.\assets\npc\Seer.png', width = 90, height = 90,
-                        posX = 0, posY = self.mapHeight - self.blockSize - 90)
-            self.npcs.append(Seer)
-        if (id == 2):
-            Cornifer = Npc('Cornifer', r'.\assets\npc\Cornifer.png', width = 200, height = 100,
-                        posX = 50 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 100)
-            self.npcs.append(Cornifer)
+        self.SetNpc(id)
 
     # 设置地图
     def SetMap(self, id):
@@ -49,7 +39,7 @@ class MapPage(Scene):
         self.numMap = self.maper.Map[id]
         for i in range(self.maper.row):
             for j in range(self.maper.col):
-                if (self.numMap[i][j] == 1) or (self.numMap[i][j] == 3):
+                if (self.numMap[i][j] == 1) or (self.numMap[i][j] == 3) or (self.numMap[i][j] == 8):
                     self.IsEntity[i][j] = True
                 else:
                     self.IsEntity[i][j] = False
@@ -69,6 +59,7 @@ class MapPage(Scene):
             r".\assets\map\benchR.png",
             r".\assets\map\benchbackL.png",
             r".\assets\map\benchbackR.png",
+            r".\assets\map\airwall.png",
         ]
         self.mapDelta = 0  # 地图移动距离
         self.ChestMoney = self.maper.ChestMoney[id]
@@ -83,6 +74,40 @@ class MapPage(Scene):
                 self.mapRect[i][j].x = j * self.blockSize
                 self.mapRect[i][j].y = i * self.blockSize
 
+    # 刷新 Npc
+    def freshnpc(self, id):
+        self.npcs = []
+        if (id == 1):
+            Cornifer = Npc('Cornifer', r'.\assets\npc\Cornifer.png', width = 200, height = 100,
+                        posX = 0, posY = self.mapHeight - self.blockSize - 100)
+            self.npcs.append(Cornifer)
+            if (not self.isdead[0]):
+                Enemy1 = Npc('Enemy1', r'.\assets\npc\enemy - 1.png', width = 56, height = 111,
+                            posX = 14 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 111)
+                self.npcs.append(Enemy1)
+            if (not self.isdead[1]):
+                Enemy6 = Npc('Enemy1', r'.\assets\npc\enemy - 1.png', width = 56, height = 111,
+                            posX = 20 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 111)
+                self.npcs.append(Enemy6)
+            if (not self.isdead[2]):
+                Enemy2 = Npc('Enemy2', r'.\assets\npc\enemy - 2.png', width = 153, height = 170,
+                            posX = 52 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize * 8 - 170)
+                self.npcs.append(Enemy2)
+        if (id == 2):
+            Seer=Npc('Seer', r'.\assets\npc\Seer.png', width = 90, height = 90,
+                        posX = 50 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 90)
+            self.npcs.append(Seer)
+            if (not self.isdead[0]):
+                Enemy3 = Npc('Enemy3', r'.\assets\npc\enemy - 1.png', width = 56, height = 111,
+                            posX = 9 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 111)
+                self.npcs.append(Enemy3)
+        
+        if (id == 3):
+            if (not self.isdead[0]):
+                Boss = Npc('Boss', r'.\assets\npc\boss.png', width = 384, height = 408,
+                            posX = 30 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 408)
+                self.npcs.append(Boss)
+
     # 还原地图
     def reborn(self, id):
         blocks = [
@@ -94,6 +119,7 @@ class MapPage(Scene):
             r".\assets\map\benchR.png",
             r".\assets\map\benchbackL.png",
             r".\assets\map\benchbackR.png",
+            r".\assets\map\airwall.png",
         ]
         self.mapDelta = 0  # 地图移动距离
         self.ChestMoney = self.maper.ChestMoney[id]
@@ -121,15 +147,7 @@ class MapPage(Scene):
         self.Dashavailable = True  # 冲刺是否可用
         self.dashTimer = 0  # 用于记录冲刺时间
         self.player.Rect.x = self.player.Rect.y = 0 # 还原坐标，从屏幕左上角降落
-        self.npcs = []
-        if (id == 1):
-            Seer=Npc('Seer', r'.\assets\npc\Seer.png', width = 90, height = 90,
-                        posX = 0, posY = self.mapHeight - self.blockSize - 90)
-            self.npcs.append(Seer)
-        if (id == 2):
-            Cornifer = Npc('Cornifer', r'.\assets\npc\Cornifer.png', width = 200, height = 100,
-                        posX = 50 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 100)
-            self.npcs.append(Cornifer)
+        self.freshnpc(id)
 
     # 设置移动
     def SetMove(self):
@@ -142,6 +160,44 @@ class MapPage(Scene):
         self.Dashavailable = True  # 冲刺是否可用
         self.dashTimer = 0  # 用于记录冲刺时间
 
+    # 设置 NPC
+    def SetNpc(self, id):
+        self.npcs = []
+        self.isdead = []
+        if (id == 1):
+            self.enemyNum = 3
+            self.isdead = [False for i in range(self.enemyNum)]
+
+            Cornifer = Npc('Cornifer', r'.\assets\npc\Cornifer.png', width = 200, height = 100,
+                        posX = 0, posY = self.mapHeight - self.blockSize - 100)
+            self.npcs.append(Cornifer)
+            Enemy1 = Npc('Enemy1', r'.\assets\npc\enemy - 1.png', width = 56, height = 111,
+                        posX = 14 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 111)
+            Enemy6 = Npc('Enemy1', r'.\assets\npc\enemy - 1.png', width = 56, height = 111,
+                        posX = 20 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 111)
+            Enemy2 = Npc('Enemy2', r'.\assets\npc\enemy - 2.png', width = 153, height = 170,
+                        posX = 52 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize * 8 - 170)
+            self.npcs.append(Enemy1)
+            self.npcs.append(Enemy6)
+            self.npcs.append(Enemy2)
+
+        if (id == 2):
+            self.enemyNum = 1
+            self.isdead = [False for i in range(self.enemyNum)]
+            Seer = Npc('Seer', r'.\assets\npc\Seer.png', width = 90, height = 90,
+                        posX = 50 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 90)
+            self.npcs.append(Seer)
+            Enemy3 = Npc('Enemy3', r'.\assets\npc\enemy - 1.png', width = 56, height = 111,
+                        posX = 9 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 111)
+            self.npcs.append(Enemy3)
+
+        if (id == 3):
+            self.enemyNum = 1
+            self.isdead = [False for i in range(self.enemyNum)]
+            Boss = Npc('Boss', r'.\assets\npc\boss.png', width = 384, height = 408,
+                        posX = 30 * MoveSettings.blockSize, posY = self.mapHeight - self.blockSize - 408)
+            self.npcs.append(Boss)
+
     # 显示
     def show(self, window):
         window.blit(self.background, (0, 0))
@@ -152,7 +208,6 @@ class MapPage(Scene):
                     window.blit(self.imgMap[i][j], (self.mapRect[i][j].x, self.mapRect[i][j].y - 0.289 * self.blockSize))
                 else:
                     window.blit(self.imgMap[i][j], self.mapRect[i][j])
-        
         for npc in self.npcs:
             window.blit(npc.image, npc.imageRect)
             # print('blit npc', npc.name, 'at', npc.imageRect.x, npc.imageRect.y)
@@ -188,12 +243,23 @@ class MapPage(Scene):
                             self.imgMap[i][j], (self.blockSize, self.blockSize * 1.289)
                         )
             
+            # 判断是否触发战斗
+            if (self.touchDown()) and (not self.player.isDashing):
+                for npc in self.npcs:
+                    if (
+                        (self.player.Rect.colliderect(npc.imageRect))
+                        and (npc.name == "Enemy1")
+                        and (not self.isdead[0])
+                    ):
+                        return ("EnterBattle",npc.name)
+
             # 判断是否进入传送门
             if (self.touchDown()) and (not self.player.isDashing):
                 for i in range(self.maper.row):
                     for j in range(self.maper.col):
-                        if (self.numMap[i][j] > 3) and (self.player.Rect.colliderect(self.mapRect[i][j])):
+                        if (self.numMap[i][j] > 3) and (self.numMap[i][j] < 8) and (self.player.Rect.colliderect(self.mapRect[i][j])):
                             return ("EnterTeleport",self.numMap[i][j])
+        return None
 
     def move(self):
         keys = pygame.key.get_pressed()

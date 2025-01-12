@@ -6,6 +6,8 @@ from Utility import BgmPlayer, Scene
 from Player import Player
 from HelpPage import HelpPage
 from ShopPage import ShopPage
+import battleController
+import random
 
 class GameManager():
 
@@ -19,8 +21,8 @@ class GameManager():
         self.settingpage = SettingPage(self.bgmplayer)
         self.helppage = HelpPage()
         self.nowmap = 1
-        self.map = [None for i in range(3)]
-        for i in range(1,3):
+        self.map = [None for i in range(4)]
+        for i in range(1,4):
             self.map[i] = MapPage(self.player, i)
         self.chatboxes = { 'Seer': ChatBox.ChatBox('Seer') }
         self.shoppage = ShopPage(self.player)
@@ -86,12 +88,65 @@ class GameManager():
                         self.map[0] = MapPage(self.player, 0)
                     listeners = [ self.map[self.nowmap] ]
                     self.map[self.nowmap].reborn(self.nowmap)
-                    BgmPlayer().switch('Map'+str(self.nowmap))
+                    self.bgmplayer.switch('Map'+str(self.nowmap))
                     self.player.Rect.x = self.player.Rect.y = 0
                 elif (value == 'EnterShop'):
                     listeners.append(self.shoppage)
                 elif (value == 'QuitShop'):
                     listeners.remove(self.shoppage)
-
+                elif (isinstance(value, tuple)) and (value[0] == 'EnterBattle'):
+                    print('EnterBattle')
+                    if (value[1] != 'Boss'):
+                        self.bgmplayer.switch('Fight')
+                    else:
+                        self.bgmplayer.switch('BossFight')
+                    if (value[1] == 'Enemy1'):
+                        status = battleController.main(Level = 1)
+                    elif (value[1] == 'Enemy2'):
+                        status = battleController.main(Level = 2)
+                    elif (value[1] == 'Enemy3'):
+                        status = battleController.main(Level = 3)
+                    elif (value[1] == 'Enemy4'):
+                        status = battleController.main(Level = 4)
+                    elif (value[1] == 'Enemy0'):
+                        status = battleController.main(Level = 0)
+                    if (status == 'Lose'):
+                        for listener in listeners:
+                            if (isinstance(listener,MapPage)):
+                                listener.reborn(self.nowmap)
+                                listeners = [ listener ]
+                    elif (status == 'Win'):
+                        if (value[1] == 'Enemy1'):
+                            for listener in listeners:
+                                if (isinstance(listener,MapPage)):
+                                    listener.isdead[0] = True
+                            self.player.money += random.randint(30, 40)
+                        elif (value[1] == 'Enemy6'):
+                            for listener in listeners:
+                                if (isinstance(listener,MapPage)):
+                                    listener.isdead[1] = True
+                            self.player.money += random.randint(40, 50)
+                        elif (value[1] == 'Enemy2'):
+                            for listener in listeners:
+                                if (isinstance(listener,MapPage)):
+                                    listener.isdead[2] = True
+                            self.player.money += random.randint(50, 60)
+                        elif (value[1] == 'Enemy3'):
+                            for listener in listeners:
+                                if (isinstance(listener,MapPage)):
+                                    listener.isdead[0] = True
+                            self.player.money += random.randint(80, 90)
+                        elif (value[1] == 'Enemy0'):
+                            for listener in listeners:
+                                if (isinstance(listener,MapPage)):
+                                    listener.isdead[0] = True
+                            self.player.money += random.randint(90, 100)
+                        elif (value[1] == 'Boss'):
+                            for listener in listeners:
+                                if (isinstance(listener,MapPage)):
+                                    listener.isdead[0] = True
+                            self.player.money += random.randint(120, 130)
+                        self.map[self.nowmap].freshnpc(self.nowmap)
+                    self.bgmplayer.switch('Map'+str(self.nowmap))
     def render(self):
         pygame.display.flip()

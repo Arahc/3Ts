@@ -6,6 +6,7 @@
 3 -> 地刺
 4,5 -> 传送门（前进）
 6,7 -> 传送门（返回）
+8 -> 空气墙
 
 row, col 的顺序和 pygame 坐标系顺序一样
 x 轴向右为正方向, y 轴向下为正方向
@@ -18,9 +19,13 @@ class GenMap():
     def __init__(self,id):
         self.row = WindowSettings.height // MoveSettings.blockSize
         self.col = WindowSettings.width // MoveSettings.blockSize
-        self.col *= 3   # 屏幕外的地图
-        self.Map = [[[0 for i in range(self.col)] for j in range(self.row)] for k in range(3)] # n*m*3
-        self.ChestMoney = [[[0 for i in range(self.col)] for j in range(self.row)] for k in range(3)] # n*m*3
+        if (id != 3):
+            self.col *= 3   # 屏幕外的地图
+        else:
+            self.col *= 2
+
+        self.Map = [[[0 for i in range(self.col)] for j in range(self.row)] for k in range(4)] # n*m*4
+        self.ChestMoney = [[[0 for i in range(self.col)] for j in range(self.row)] for k in range(4)] # n*m*4
 
         if (id == 0):
             self.randomMap()
@@ -28,7 +33,7 @@ class GenMap():
             self.designedMap(id)
     
     def designedMap(self, id):
-        # row = 13, col = 60
+        # row = 13, col = 60 or 40
         r = self.row
         c = self.col
 
@@ -37,8 +42,8 @@ class GenMap():
             self.Map[1][r - 1][j] = 1
         
         if (id == 1):
-            self.Map[1][r - 2][2] = 6
-            self.Map[1][r - 2][3] = 7
+            self.Map[1][r - 2][5] = 6
+            self.Map[1][r - 2][6] = 7
 
             # 多级向上 AD 跳
             for i in range(r - 3):
@@ -158,14 +163,22 @@ class GenMap():
             self.Map[2][r - 2][42] = 3
             self.Map[2][r - 2][43] = 3
             self.Map[2][r - 2][44] = 3
-            self.Map[2][r - 2][45] = 3
-        
+
+            self.Map[2][r - 2][54] = 4
+            self.Map[2][r - 2][55] = 5
+
+        if (id == 3):
+            self.Map[3][r - 3][0] = 6
+            self.Map[3][r - 3][1] = 7
+            for j in range(c):
+                self.Map[3][r - 2][j] = 8
+
     # 随机生成地图
     def randomMap(self):
         random.seed(time.time())
         # 铺地板
         for j in range(self.col):
-            self.Map[0][self.row - 1][j] = self.Map[2][self.row - 1][j] = 1
+            self.Map[0][self.row - 1][j] = 1
         self.Map[0][self.row - 2][0] = 4
         self.Map[0][self.row - 2][1] = 5
         '''

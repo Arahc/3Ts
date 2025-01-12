@@ -52,6 +52,12 @@ class BgmPlayer():
             bgm = pygame.mixer.music.load('./assets/bgm/Map - City of Tears.mp3')
         elif (scene == 'Map2'):
             bgm = pygame.mixer.music.load('./assets/bgm/Map - Crossroads.mp3')
+        elif (scene == 'Map3'):
+            bgm = pygame.mixer.music.load('./assets/bgm/Map - Final.mp3')
+        elif (scene == 'Fight'):
+            bgm = pygame.mixer.music.load('./assets/bgm/Battle - enemies.mp3')
+        elif (scene == 'BossFight'):
+            bgm = pygame.mixer.music.load('./assets/bgm/Battle - Radiance.mp3')
         pygame.mixer.music.play(-1)
 
     def post(self):
