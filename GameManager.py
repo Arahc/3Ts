@@ -104,16 +104,16 @@ class GameManager():
                         self.bgmplayer.switch('Fight')
                     else:
                         self.bgmplayer.switch('BossFight')
-                    if (value[1] == 'Enemy1'):
+                    if ((value[1] == 'Enemy1') or (value[1] == 'Enemy6')):
                         status = battleController.main(Level = 1)
                     elif (value[1] == 'Enemy2'):
                         status = battleController.main(Level = 2)
                     elif (value[1] == 'Enemy3'):
                         status = battleController.main(Level = 3)
-                    elif (value[1] == 'Enemy4'):
-                        status = battleController.main(Level = 4)
                     elif (value[1] == 'Enemy0'):
                         status = battleController.main(Level = 0)
+                    elif (value[1] == 'Boss'):
+                        status = battleController.main(Level = 4)
                     if (status == 'Lose'):
                         for listener in listeners:
                             if (isinstance(listener,MapPage)):

@@ -6,7 +6,7 @@
             "ID": "en1-2",
             "name": "重型卫兵",
             "type": "normal",
-            "HP": 40,
+            "HP": 32,
             "maxHP": 40,
             "SP": 100,
             "SPHeal": 100,
@@ -18,7 +18,7 @@
                     "description": "",
                     "gate": "xor",
                     "type": "True",
-                    "level": 2,
+                    "level": 1,
                     "effects": [],
                     "imgLocation": "./assets/card/1-2-1.png"
                 },
@@ -28,7 +28,7 @@
                     "description": "",
                     "gate": "xnor",
                     "type": "True",
-                    "level": 2,
+                    "level": 1,
                     "effects": [],
                     "imgLocation": "./assets/card/1-2-2.png"
                 },
@@ -38,7 +38,7 @@
                     "description": "",
                     "gate": "nand",
                     "type": "False",
-                    "level": 3,
+                    "level": 2,
                     "effects": [],
                     "imgLocation": "./assets/card/1-2-3.png"
                 },
@@ -48,7 +48,7 @@
                     "description": "",
                     "gate": "xnor",
                     "type": "True",
-                    "level": 2,
+                    "level": 1,
                     "effects": [],
                     "imgLocation": "./assets/card/1-2-4.png"
                 },
@@ -58,7 +58,7 @@
                     "description": "本卡无法被操作。本卡不计入拼点。受到伤害时，伤害减少本卡等级，若伤害因此变为零，下回合固定使用特殊强卡。",
                     "gate": "Defence",
                     "type": "True",
-                    "level": 2,
+                    "level": 1,
                     "effects": [
                         "selectProhibit",
                         "defence",
@@ -72,7 +72,7 @@
                     "description": "本卡无法被操作。本卡不计入拼点。受到伤害时，伤害减少本卡等级，若伤害因此变为零，下回合固定使用特殊强卡。",
                     "gate": "Defence",
                     "type": "False",
-                    "level": 2,
+                    "level": 1,
                     "effects": [
                         "selectProhibit",
                         "defence",
@@ -86,7 +86,7 @@
                     "description": "本卡无法被操作。",
                     "gate": "None",
                     "type": "False",
-                    "level": 12,
+                    "level": 11,
                     "effects": [
                         "selectProhibit"
                     ],
@@ -98,7 +98,7 @@
                     "description": "本卡无法被操作。",
                     "gate": "None",
                     "type": "True",
-                    "level": 12,
+                    "level": 11,
                     "effects": [
                         "selectProhibit"
                     ],

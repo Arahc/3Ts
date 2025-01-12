@@ -46,8 +46,6 @@ class Player():
 
         # 属性设置
         self.money = 0
-        self.hp = 20
-        self.card_level = 1
     
     def show(self, window):
         # 展示人物位置

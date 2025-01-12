@@ -6,7 +6,7 @@
             "ID": "en0-1",
             "name": "大黄蜂",
             "type": "normal",
-            "HP": 400,
+            "HP": 600,
             "maxHP": 750,
             "SP": 70,
             "SPHeal": 70,
@@ -38,7 +38,7 @@
                     "description": "",
                     "gate": "xor",
                     "type": "True",
-                    "level": 2,
+                    "level": 1,
                     "effects": [],
                     "imgLocation": "./assets/card/0-1-3.png"
                 },
@@ -48,7 +48,7 @@
                     "description": "",
                     "gate": "xor",
                     "type": "False",
-                    "level": 3,
+                    "level": 2,
                     "effects": [],
                     "imgLocation": "./assets/card/0-1-4.png"
                 },
@@ -58,7 +58,7 @@
                     "description": "",
                     "gate": "and",
                     "type": "True",
-                    "level": 3,
+                    "level": 2,
                     "effects": [],
                     "imgLocation": "./assets/card/0-1-5.png"
                 },
@@ -68,7 +68,7 @@
                     "description": "",
                     "gate": "and",
                     "type": "False",
-                    "level": 2,
+                    "level": 1,
                     "effects": [],
                     "imgLocation": "./assets/card/0-1-6.png"
                 }
