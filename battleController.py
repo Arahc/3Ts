@@ -38,6 +38,7 @@ def mainInit():
     gSet['fps'] = 60
     pg.display.set_caption("Oops! A battle.")
     gSet['screen'] = pg.display.set_mode(gSet['screenSize'])
+    print(type(gSet['screen']))
 
     # button sizes
     gSet['endTurnButtonWidth'] = 75
@@ -230,7 +231,7 @@ def cardInfoDeal(friendUnit:Character, enemyUnit:Character):
 
 Animations = []
 
-def main(Level:int = 0, FriendID:str = "fr0"):
+def main(Level:int = 0, FriendID:str = "fr1"):
     pg.init()
     mainInit()
     
