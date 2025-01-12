@@ -69,7 +69,7 @@
                     "description": "",
                     "gate": "not",
                     "type": "False",
-                    "level": 3,
+                    "level": 1,
                     "effects": [],
                     "imgLocation": "./assets/card/A-1.png"
                 },
@@ -79,7 +79,7 @@
                     "description": "",
                     "gate": "and",
                     "type": "False",
-                    "level": 3,
+                    "level": 1,
                     "effects": [],
                     "imgLocation": "./assets/card/A-2.png"
                 },
@@ -89,7 +89,7 @@
                     "description": "",
                     "gate": "or",
                     "type": "True",
-                    "level": 3,
+                    "level": 1,
                     "effects": [],
                     "imgLocation": "./assets/card/A-3.png"
                 },
@@ -99,7 +99,7 @@
                     "description": "",
                     "gate": "nand",
                     "type": "True",
-                    "level": 3,
+                    "level": 1,
                     "effects": [],
                     "imgLocation": "./assets/card/A-4.png"
                 },
@@ -109,7 +109,7 @@
                     "description": "",
                     "gate": "nor",
                     "type": "False",
-                    "level": 3,
+                    "level": 1,
                     "effects": [],
                     "imgLocation": "./assets/card/A-5.png"
                 },
@@ -119,7 +119,7 @@
                     "description": "",
                     "gate": "xor",
                     "type": "True",
-                    "level": 3,
+                    "level": 1,
                     "effects": [],
                     "imgLocation": "./assets/card/A-6.png"
                 },
@@ -129,7 +129,7 @@
                     "description": "",
                     "gate": "xnor",
                     "type": "False",
-                    "level": 3,
+                    "level": 1,
                     "effects": [],
                     "imgLocation": "./assets/card/A-7.png"
                 }

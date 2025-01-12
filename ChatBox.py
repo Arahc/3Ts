@@ -6,13 +6,14 @@ from typing import List, Dict
 import difficultyController
 from GameSettings import ChatBoxSettings as CBS
 
+
 class ChatBox(Scene):
     def __init__(self, npcName):
-        
+
         self.text_color = CBS.text_color
         self.font = pygame.font.Font(FontSettings.FontPath, 28)
         self.chat_content = []
-        self.input_text = ''
+        self.input_text = ""
 
         # 输入文本位置
         self.input_text_x = CBS.input_box_x + 10
@@ -25,27 +26,31 @@ class ChatBox(Scene):
         # 文字最大行数
         self.max_lines = CBS.chatbox_height // self.line_height
 
-        self.chatbox_surface = pygame.Surface((CBS.chatbox_width, CBS.chatbox_height), pygame.SRCALPHA)
-        self.input_box_surface = pygame.Surface((CBS.input_box_width, CBS.input_box_height), pygame.SRCALPHA)
+        self.chatbox_surface = pygame.Surface(
+            (CBS.chatbox_width, CBS.chatbox_height), pygame.SRCALPHA
+        )
+        self.input_box_surface = pygame.Surface(
+            (CBS.input_box_width, CBS.input_box_height), pygame.SRCALPHA
+        )
 
         # 当前显示的聊天记录末尾的索引
         self.current_display_index = -1
-        
+
         self.text_lines = []
         self.input_done = False
         self.npcName = npcName
 
         # 设置 AI
         self.client = OpenAI(
-            base_url='http://10.15.88.73:5006/v1',
-            api_key='ollama',
+            base_url="http://10.15.88.73:5006/v1",
+            api_key="ollama",
         )
 
-        if (self.npcName == 'Seer'):
+        if self.npcName == "Seer":
             self.messages: List[Dict] = [
                 {
-                    'role': 'system',
-                    'content': 
+                    "role": "system",
+                    "content":
                     # '''
                     # 你要扮演游戏《空洞骑士》里的蛾子一族里的先知。
                     # 在《空洞骑士》中，游戏背景设定在一个名为德特茅斯的衰落小镇下掩埋的古老王国“圣巢”。
@@ -59,7 +64,7 @@ class ChatBox(Scene):
                     # 先知作为蛾子一族的智者，对圣巢的历史和秘密有着深刻的了解，玩家扮演的小骑士会向你发出一系列问题，请给出符合你身份的中文回答。
                     # 千万记得，在对话的开始提醒小骑士，最终 BOSS 辐光 就在前方。
                     # '''
-                    '''
+                    """
                     You are to role-play as the Seer from the moth tribe in the game Hollow Knight. 
                     In Hollow Knight, the game is set in a vast, ancient kingdom called Hallownest, located beneath the fading town of Dirtmouth. 
                     This once prosperous kingdom was ruled by the Pale King and Pale Lady, who granted insects wisdom, language, and purpose. 
@@ -71,15 +76,15 @@ class ChatBox(Scene):
                     Remember to remind the little knight at the beginning of the dialogue that the final boss, Radiance, is just ahead.
                     The player-controlled Knight will pose you a series of questions, and you are to respond in a manner befitting your character.
                     Your answer shouldn't be longer than 20 words.
-                    '''
+                    """,
                 }
             ]
-        
-        if (self.npcName == 'Cornifer'):
+
+        if self.npcName == "Cornifer":
             self.messages: List[Dict] = [
                 {
-                    'role': 'system',
-                    'content': 
+                    "role": "system",
+                    "content":
                     # '''
                     # 你要扮演游戏《空洞骑士》里的商店NPC Cornifer。你热爱探险，收集了很多有用的道具可以卖给玩家扮演的小骑士。
                     # 你的商店主要出售卡牌等级强化（这是卡牌游戏）、血量上限提升、精力提升以及精力恢复提升这四种道具。
@@ -91,27 +96,30 @@ class ChatBox(Scene):
                     # “Medium Mode：这瓶血量上限提升药剂很适合你在普通模式下使用，增加血量上限，让你能承受更多伤害。”
                     # “Hard Mode：精力提升药剂在困难模式下可是宝贝，能让你在激烈的战斗中更持久地作战。”
                     # '''
-                    '''
+                    """
                     You are to play the role of Cornifer, the NPC from the game 'Hollow Knight.'
                     At the very beginning of the conversation with the player, you must remember to ask them to choose the game difficulty. You can say 'Oh, dear little knight, welcome to my shop! Before embarking on your adventure, don't forget to tell me which game difficulty you would like to choose. Is it Easy Mode for a relaxed exploration, Medium Mode for a bit of a challenge, or Hard Mode for a tough trial?' 
                     If the player forgets to choose the game difficulty or does not mention what difficulty they want in their response, you should proactively choose the Easy Mode and tell the player.
                     If the player has chosen the game difficulty, than don't do this step.
                     Your answer shouldn't be longer than 20 words.
-                    '''
+                    """,
                 }
             ]
 
-        self.npc_response = ''
+        self.npc_response = ""
 
     def split(self):
-        current_line = ''
+        current_line = ""
         for char in self.chat_content[-1]:
-            if self.font.render(current_line + char, True, self.text_color).get_width() <= self.max_text_width:
+            if (
+                self.font.render(current_line + char, True, self.text_color).get_width()
+                <= self.max_text_width
+            ):
                 current_line += char
             else:
                 self.text_lines.append(current_line)
                 current_line = char
-        if (len(current_line) > 0):
+        if len(current_line) > 0:
             self.text_lines.append(current_line)
         self.current_display_index = len(self.text_lines) - 1
         self.input_done = False
@@ -122,7 +130,7 @@ class ChatBox(Scene):
                 # 按下回车键，将输入文本添加到聊天内容列表
                 if self.input_text:
                     self.chat_content.append(self.input_text)
-                    self.input_text = ''
+                    self.input_text = ""
                     self.input_done = True
             elif event.key == pygame.K_BACKSPACE:
                 # 按下退格键，删除输入文本的最后一个字符
@@ -133,53 +141,59 @@ class ChatBox(Scene):
                     self.current_display_index -= 1
             elif event.key == pygame.K_DOWN:
                 # 按下键，向下切换显示的聊天记录
-                if (self.current_display_index < len(self.text_lines) - 1):
+                if self.current_display_index < len(self.text_lines) - 1:
                     self.current_display_index += 1
             elif event.key == pygame.K_ESCAPE:
-                return ('EndChat',self.npcName)
+                return ("EndChat", self.npcName)
             else:
                 # 其他按键，添加字符到输入文本
                 self.input_text += event.unicode
 
         # 切分，并且生成 NPC 回复
-        if (self.input_done):
-            
+        if self.input_done:
+
             # 调整难度
-            if (self.npcName == 'Cornifer'):
+            if self.npcName == "Cornifer":
                 easy = False
                 medium = False
                 hard = False
-                if ('easy' in self.chat_content[-1]) or ('Easy' in self.chat_content[-1]):
-                    easy=True
-                elif ('medium' in self.chat_content[-1]) or ('Medium' in self.chat_content[-1]):
-                    medium=True
-                elif ('hard' in self.chat_content[-1]) or ('Hard' in self.chat_content[-1]):
-                    hard=True
-                if ((easy) and (not medium) and (not hard)):
+                if ("easy" in self.chat_content[-1]) or (
+                    "Easy" in self.chat_content[-1]
+                ):
+                    easy = True
+                elif ("medium" in self.chat_content[-1]) or (
+                    "Medium" in self.chat_content[-1]
+                ):
+                    medium = True
+                elif ("hard" in self.chat_content[-1]) or (
+                    "Hard" in self.chat_content[-1]
+                ):
+                    hard = True
+                if (easy) and (not medium) and (not hard):
                     difficultyController.setEasy()
-                    print('Set Easy Mode')
-                elif ((not easy) and (medium) and (not hard)):
+                    print("Set Easy Mode")
+                elif (not easy) and (medium) and (not hard):
                     difficultyController.setNormal()
-                    print('Set Medium Mode')
-                elif ((not easy) and (not medium) and (hard)):
+                    print("Set Medium Mode")
+                elif (not easy) and (not medium) and (hard):
                     difficultyController.setHard()
-                    print('Set Hard Mode')
+                    print("Set Hard Mode")
 
             # 切分
-            self.chat_content[-1] = 'You: ' + self.chat_content[-1]
+            self.chat_content[-1] = "You: " + self.chat_content[-1]
             self.split()
 
-            self.messages.append({'role': 'user', 'content': self.chat_content[-1]})
+            self.messages.append({"role": "user", "content": self.chat_content[-1]})
             response = self.client.chat.completions.create(
-                model='llama3.2',
+                model="llama3.2",
                 messages=self.messages,
             )
             self.npc_response = response.choices[0].message.content
             # 将助手添加到对话历史
-            self.messages.append({'role': 'assistant', 'content': self.npc_response})
+            self.messages.append({"role": "assistant", "content": self.npc_response})
 
             # 切分
-            self.chat_content.append(self.npcName + ': ' + self.npc_response)
+            self.chat_content.append(self.npcName + ": " + self.npc_response)
             self.split()
 
         return None
@@ -191,7 +205,10 @@ class ChatBox(Scene):
 
         # 绘制聊天内容
         y_offset = 0
-        for i in range(max(0, self.current_display_index - self.max_lines+1), self.current_display_index+1):
+        for i in range(
+            max(0, self.current_display_index - self.max_lines + 1),
+            self.current_display_index + 1,
+        ):
             text = self.text_lines[i]
             # 计算文字位置
             text_x = CBS.chatbox_x + 10
@@ -212,9 +229,14 @@ class ChatBox(Scene):
         if input_text_width > self.max_text_width:
             # 如果输入文本宽度超过最大宽度，直接切分实现换行
             input_text_lines = []
-            current_line = ''
+            current_line = ""
             for char in self.input_text:
-                if self.font.render(current_line + char, True, self.text_color).get_width() <= self.max_text_width:
+                if (
+                    self.font.render(
+                        current_line + char, True, self.text_color
+                    ).get_width()
+                    <= self.max_text_width
+                ):
                     current_line += char
                 else:
                     input_text_lines.append(current_line)
@@ -222,6 +244,9 @@ class ChatBox(Scene):
             input_text_lines.append(current_line)
             for i, line in enumerate(input_text_lines):
                 line_surface = self.font.render(line, True, self.text_color)
-                window.blit(line_surface, (self.input_text_x, self.input_text_y + i * self.line_height))
+                window.blit(
+                    line_surface,
+                    (self.input_text_x, self.input_text_y + i * self.line_height),
+                )
         else:
             window.blit(input_text_surface, (self.input_text_x, self.input_text_y))

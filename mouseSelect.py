@@ -9,7 +9,8 @@ selectedFriendCard = None
 
 cardAttacktime = 0
 
-def data(name:str):
+
+def data(name: str):
     if name == "selectedCards":
         return selectedCards
     elif name == "hoveredCards":
@@ -19,11 +20,13 @@ def data(name:str):
     elif name == "selectedFriendCard":
         return selectedFriendCard
 
+
 def attackClear():
     global cardAttacktime
     cardAttacktime = 0
 
-def checkCardSelection(friendUnit:Character, enemyUnit:Character):
+
+def checkCardSelection(friendUnit: Character, enemyUnit: Character):
     """
     Check if the player chooses enough card. If so, do such a card-attack.
     """
@@ -34,17 +37,31 @@ def checkCardSelection(friendUnit:Character, enemyUnit:Character):
 
     cardAttacktime += 1
     gate = selectedFriendCard.gate
-    if gate == 'not' and len(selectedCards) == 2:
+    if gate == "not" and len(selectedCards) == 2:
         enemyCard = next(card for card in selectedCards if card != selectedFriendCard)
-        newCard = cardAttack(gate=gate, card0=selectedFriendCard, card1=enemyCard, card2=None, time=cardAttacktime)
+        newCard = cardAttack(
+            gate=gate,
+            card0=selectedFriendCard,
+            card1=enemyCard,
+            card2=None,
+            time=cardAttacktime,
+        )
         enemyUnit.onHandCards.append(newCard)
         friendUnit.useCard(selectedFriendCard)
         enemyUnit.lostCard(enemyCard)
         selectedCards.clear()
         selectedFriendCard = None
-    elif gate in ['and', 'or', 'xor', 'nand', 'nor', 'xnor'] and len(selectedCards) == 3:
+    elif (
+        gate in ["and", "or", "xor", "nand", "nor", "xnor"] and len(selectedCards) == 3
+    ):
         enemyCards = [card for card in selectedCards if card != selectedFriendCard]
-        newCard = cardAttack(gate=gate, card0=selectedFriendCard, card1=enemyCards[0], card2=enemyCards[1], time=cardAttacktime)
+        newCard = cardAttack(
+            gate=gate,
+            card0=selectedFriendCard,
+            card1=enemyCards[0],
+            card2=enemyCards[1],
+            time=cardAttacktime,
+        )
         enemyUnit.onHandCards.append(newCard)
         friendUnit.useCard(selectedFriendCard)
         enemyUnit.lostCard(enemyCards[0])
@@ -52,36 +69,50 @@ def checkCardSelection(friendUnit:Character, enemyUnit:Character):
         selectedCards.clear()
         selectedFriendCard = None
 
-def cardHover(mousePos:tuple, friendUnit:Character, enemyUnit:Character):
+
+def cardHover(mousePos: tuple, friendUnit: Character, enemyUnit: Character):
     """
     Check if the player uses mouse to hover over a card
     """
 
     from battleController import gSet
+
     global hoveredCards, hoveredCardPos
 
     hoveredCards = None
     hoveredCardPos = None
-    cardSpacing = gSet['cardSpace']
+    cardSpacing = gSet["cardSpace"]
 
     for card in friendUnit.onHandCards + enemyUnit.onHandCards:
         x = None
         y = None
-        maxCardsPerRow = max((gSet['screenWidth'] // 2 - 180) // (gSet['cardWidth'] + cardSpacing), 1)
+        maxCardsPerRow = max(
+            (gSet["screenWidth"] // 2 - 180) // (gSet["cardWidth"] + cardSpacing), 1
+        )
         if card in friendUnit.onHandCards:
             index = friendUnit.onHandCards.index(card)
             row = index // maxCardsPerRow
             col = index % maxCardsPerRow
-            x = 10 + col * (gSet['cardWidth'] + cardSpacing)
-            y = gSet['screenHeight'] - gSet['cardHeight'] - 10 - row * (gSet['cardHeight'] + cardSpacing)
+            x = 10 + col * (gSet["cardWidth"] + cardSpacing)
+            y = (
+                gSet["screenHeight"]
+                - gSet["cardHeight"]
+                - 10
+                - row * (gSet["cardHeight"] + cardSpacing)
+            )
         else:
             index = enemyUnit.onHandCards.index(card)
             row = index // maxCardsPerRow
             col = index % maxCardsPerRow
-            x = gSet['screenWidth'] - (col + 1) * (gSet['cardWidth'] + cardSpacing)
-            y = gSet['screenHeight'] - gSet['cardHeight'] - 10 - row * (gSet['cardHeight'] + cardSpacing)
+            x = gSet["screenWidth"] - (col + 1) * (gSet["cardWidth"] + cardSpacing)
+            y = (
+                gSet["screenHeight"]
+                - gSet["cardHeight"]
+                - 10
+                - row * (gSet["cardHeight"] + cardSpacing)
+            )
 
-        card_rect = pg.Rect(x, y, gSet['cardWidth'], gSet['cardHeight'])
+        card_rect = pg.Rect(x, y, gSet["cardWidth"], gSet["cardHeight"])
         if card_rect.collidepoint(mousePos):
             mask = pg.mask.from_surface(card.img.img)
             local_pos = mousePos[0] - x, mousePos[1] - y
@@ -90,7 +121,8 @@ def cardHover(mousePos:tuple, friendUnit:Character, enemyUnit:Character):
                 hoveredCardPos = (x, y)
                 break
 
-def cardSelect(friendUnit:Character, enemyUnit:Character):
+
+def cardSelect(friendUnit: Character, enemyUnit: Character):
     """
     Check if the player select a card
     The player cannot select a card which has effect "selectProhibit"
@@ -112,14 +144,23 @@ def cardSelect(friendUnit:Character, enemyUnit:Character):
                     selectedCards.remove(selectedFriendCard)
                     selectedFriendCard = hoveredCards
                     selectedCards.add(hoveredCards)
-            elif selectedFriendCard is not None and hoveredCards in enemyUnit.onHandCards and "selectProhibit" not in hoveredCards.effects:
-                if selectedFriendCard.gate == 'not' and len(selectedCards) == 1:
+            elif (
+                selectedFriendCard is not None
+                and hoveredCards in enemyUnit.onHandCards
+                and "selectProhibit" not in hoveredCards.effects
+            ):
+                if selectedFriendCard.gate == "not" and len(selectedCards) == 1:
                     selectedCards.add(hoveredCards)
                     checkCardSelection(friendUnit, enemyUnit)
-                elif selectedFriendCard.gate in ['and', 'or', 'xor', 'nand', 'nor', 'xnor'] and len(selectedCards) < 3:
+                elif (
+                    selectedFriendCard.gate
+                    in ["and", "or", "xor", "nand", "nor", "xnor"]
+                    and len(selectedCards) < 3
+                ):
                     selectedCards.add(hoveredCards)
                     if len(selectedCards) == 3:
                         checkCardSelection(friendUnit, enemyUnit)
+
 
 def turnEndPress():
     """
@@ -128,37 +169,55 @@ def turnEndPress():
 
     from battleController import gSet
 
-    turnEndImgRect = pg.Rect(gSet['turnButton'].x, gSet['turnButton'].y, gSet['endTurnButtonWidth'], gSet['endTurnButtonHeight'])
+    turnEndImgRect = pg.Rect(
+        gSet["turnButton"].x,
+        gSet["turnButton"].y,
+        gSet["endTurnButtonWidth"],
+        gSet["endTurnButtonHeight"],
+    )
     if turnEndImgRect.collidepoint(pg.mouse.get_pos()):
         return "End"
     return ""
 
-def drawPress(event:pg.Event):
+
+def drawPress(event: pg.Event):
     """
     Check if the player presses the draw button
     """
 
     from battleController import gSet
 
-    drawImgRect = pg.Rect(gSet['drawButton'].x, gSet['drawButton'].y, gSet['draw&undoButtonWidth'], gSet['draw&undoButtonHeight'])
+    drawImgRect = pg.Rect(
+        gSet["drawButton"].x,
+        gSet["drawButton"].y,
+        gSet["draw&undoButtonWidth"],
+        gSet["draw&undoButtonHeight"],
+    )
     if drawImgRect.collidepoint(event.pos):
         return "Draw"
     return ""
 
-def undoTurnPress(event:pg.Event):
+
+def undoTurnPress(event: pg.Event):
     """
     Check if the player presses the undo turn button
     """
 
     from battleController import gSet
 
-    undoImgRect = pg.Rect(gSet['undoButton'].x, gSet['undoButton'].y, gSet['draw&undoButtonWidth'], gSet['draw&undoButtonHeight'])
+    undoImgRect = pg.Rect(
+        gSet["undoButton"].x,
+        gSet["undoButton"].y,
+        gSet["draw&undoButtonWidth"],
+        gSet["draw&undoButtonHeight"],
+    )
     if undoImgRect.collidepoint(event.pos):
         attackClear()
         return "Undo"
     return ""
 
-def mouseLeftButton(event:pg.Event, friendUnit:Character, enemyUnit:Character):
+
+def mouseLeftButton(event: pg.Event, friendUnit: Character, enemyUnit: Character):
     """
     Check the following events:
     - Select a card
@@ -176,11 +235,14 @@ def mouseLeftButton(event:pg.Event, friendUnit:Character, enemyUnit:Character):
 
     return buttonState
 
-def mouseRightButton(event:pg.Event):
+
+def mouseRightButton(event: pg.Event):
     pass
 
-def mouseMiddleButton(event:pg.Event):
+
+def mouseMiddleButton(event: pg.Event):
     pass
 
-def mouseMove(event:pg.Event, friendUnit:Character, enemyUnit:Character):
+
+def mouseMove(event: pg.Event, friendUnit: Character, enemyUnit: Character):
     cardHover(mousePos=event.pos, friendUnit=friendUnit, enemyUnit=enemyUnit)

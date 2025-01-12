@@ -3,7 +3,8 @@ from Img import Img
 from Animation import Sleep, moveAnimation, fadeAnimation
 import pygame as pg
 
-done = 0 # number of done units
+done = 0  # number of done units
+
 
 def Done():
     """
@@ -18,10 +19,12 @@ def Done():
         return True
     return False
 
+
 friendOriginPos = None
 enemyOriginPos = None
 
-def cardInfoSurface(unit:Character, type:bool, color:tuple):
+
+def cardInfoSurface(unit: Character, type: bool, color: tuple):
     """
     Create a surface displaying the card information for the given unit.
     """
@@ -30,14 +33,24 @@ def cardInfoSurface(unit:Character, type:bool, color:tuple):
 
     width, height = 200, 0
 
-    total = sum(card.level for card in unit.onHandCards if (card.type == type and "defence" not in card.effects))
-    textTotal = gSet['font-clashInfo-number'].render(f'Total: {total}', True, color)
+    total = sum(
+        card.level
+        for card in unit.onHandCards
+        if (card.type == type and "defence" not in card.effects)
+    )
+    textTotal = gSet["font-clashInfo-number"].render(f"Total: {total}", True, color)
 
-    defence = sum(card.level for card in unit.onHandCards if (card.type == type and "defence" in card.effects))
+    defence = sum(
+        card.level
+        for card in unit.onHandCards
+        if (card.type == type and "defence" in card.effects)
+    )
     textDefenceContent = ""
     if defence > 0:
-        textDefenceContent = f' +({defence})'
-    textDefence = gSet['font-clashInfo-number'].render(textDefenceContent, True, gSet['--font-color-light'])
+        textDefenceContent = f" +({defence})"
+    textDefence = gSet["font-clashInfo-number"].render(
+        textDefenceContent, True, gSet["--font-color-light"]
+    )
 
     width = max(width, textTotal.get_width() + textDefence.get_width())
     height = textTotal.get_height() + 5
@@ -45,12 +58,16 @@ def cardInfoSurface(unit:Character, type:bool, color:tuple):
     textCards = []
     for card in unit.onHandCards:
         if card.type == type and "defence" not in card.effects:
-            text = gSet['font-clashInfo-card'].render(f'{card.title}: {card.level}', True, gSet['--font-color-light'])
+            text = gSet["font-clashInfo-card"].render(
+                f"{card.title}: {card.level}", True, gSet["--font-color-light"]
+            )
             textCards.append(text)
             width = max(width, text.get_width())
             height += text.get_height()
         elif card.type == type:
-            text = gSet['font-clashInfo-card'].render(f'{card.title}: {card.level} (防御)', True, gSet['--font-color-light'])
+            text = gSet["font-clashInfo-card"].render(
+                f"{card.title}: {card.level} (防御)", True, gSet["--font-color-light"]
+            )
             textCards.append(text)
             width = max(width, text.get_width())
             height += text.get_height()
@@ -59,7 +76,7 @@ def cardInfoSurface(unit:Character, type:bool, color:tuple):
     height += 20
     surface = pg.Surface((width, height), pg.SRCALPHA)
     surface.fill((0, 0, 0, 0))
-    bgColor = gSet['--card-info-ground']
+    bgColor = gSet["--card-info-ground"]
     bgColor = (*bgColor, int(0.7 * 255))
     pg.draw.rect(surface, bgColor, (0, 0, width, height))
 
@@ -72,7 +89,8 @@ def cardInfoSurface(unit:Character, type:bool, color:tuple):
 
     return surface
 
-def clashState1(Animations:list, friendUnit:Character, enemyUnit:Character):
+
+def clashState1(Animations: list, friendUnit: Character, enemyUnit: Character):
     """
     The characters moved to the x-center of the screen, ready to clash
     """
@@ -81,30 +99,67 @@ def clashState1(Animations:list, friendUnit:Character, enemyUnit:Character):
     from battleController import gSet
 
     done = 0
-    endPosFriend = (gSet['screenWidth'] // 2 - friendUnit.imgAttackYang.width + 25, friendUnit.img.y)
-    endPosEnemy = (gSet['screenWidth'] // 2 - 25, enemyUnit.img.y)
-    if '(boss)' in enemyUnit.name:
+    endPosFriend = (
+        gSet["screenWidth"] // 2 - friendUnit.imgAttackYang.width + 25,
+        friendUnit.img.y,
+    )
+    endPosEnemy = (gSet["screenWidth"] // 2 - 25, enemyUnit.img.y)
+    if "(boss)" in enemyUnit.name:
         endPosEnemy = enemyUnit.img.pos
     friendOriginPos = friendUnit.img.pos
     enemyOriginPos = enemyUnit.img.pos
     friendUnit.showImg = friendUnit.imgDash
     enemyUnit.showImg = enemyUnit.imgDash
-    if '(boss)' in enemyUnit.name:
+    if "(boss)" in enemyUnit.name:
         enemyUnit.showImg = enemyUnit.img
-    Animations.append(moveAnimation(object=friendUnit.imgDash, animateSeconds=0.5, nowPos=friendUnit.img.pos, endPos=endPosFriend, name="FriendClash1"))
-    if '(boss)' in enemyUnit.name:
-        Animations.append(moveAnimation(object=enemyUnit.imgDash, animateSeconds=0.5, nowPos=enemyUnit.img.pos, endPos=enemyUnit.img.pos, name="EnemyClash1"))
+    Animations.append(
+        moveAnimation(
+            object=friendUnit.imgDash,
+            animateSeconds=0.5,
+            nowPos=friendUnit.img.pos,
+            endPos=endPosFriend,
+            name="FriendClash1",
+        )
+    )
+    if "(boss)" in enemyUnit.name:
+        Animations.append(
+            moveAnimation(
+                object=enemyUnit.imgDash,
+                animateSeconds=0.5,
+                nowPos=enemyUnit.img.pos,
+                endPos=enemyUnit.img.pos,
+                name="EnemyClash1",
+            )
+        )
     else:
-        Animations.append(moveAnimation(object=enemyUnit.imgDash, animateSeconds=0.5, nowPos=enemyUnit.img.pos, endPos=(endPosEnemy[0] + (enemyUnit.imgAttackYang.width - enemyUnit.imgDash.width), endPosEnemy[1]), name="EnemyClash1"))
+        Animations.append(
+            moveAnimation(
+                object=enemyUnit.imgDash,
+                animateSeconds=0.5,
+                nowPos=enemyUnit.img.pos,
+                endPos=(
+                    endPosEnemy[0]
+                    + (enemyUnit.imgAttackYang.width - enemyUnit.imgDash.width),
+                    endPosEnemy[1],
+                ),
+                name="EnemyClash1",
+            )
+        )
     friendUnit.img.setPos(endPosFriend)
     friendUnit.imgAttackYang.setPos(endPosFriend)
     friendUnit.imgAttackYin.setPos(endPosFriend)
-    if '(boss)' not in enemyUnit.name:
-        enemyUnit.img.setPos((endPosEnemy[0] + (enemyUnit.imgAttackYang.width - enemyUnit.img.width), endPosEnemy[1]))
+    if "(boss)" not in enemyUnit.name:
+        enemyUnit.img.setPos(
+            (
+                endPosEnemy[0] + (enemyUnit.imgAttackYang.width - enemyUnit.img.width),
+                endPosEnemy[1],
+            )
+        )
         enemyUnit.imgAttackYang.setPos(endPosEnemy)
         enemyUnit.imgAttackYin.setPos(endPosEnemy)
 
-def clashState2(Animations:list, friendUnit:Character, enemyUnit:Character):
+
+def clashState2(Animations: list, friendUnit: Character, enemyUnit: Character):
     """
     The characters clashed
     The calculation of yang is done here
@@ -120,24 +175,90 @@ def clashState2(Animations:list, friendUnit:Character, enemyUnit:Character):
     done = 0
     friendUnit.showImg = friendUnit.imgAttackYang
     enemyUnit.showImg = enemyUnit.imgAttackYang
-    friendLevel = sum(card.level for card in friendUnit.onHandCards if (card.type and "defence" not in card.effects))
-    enemyLevel = sum(card.level for card in enemyUnit.onHandCards if (card.type and "defence" not in card.effects))
+    friendLevel = sum(
+        card.level
+        for card in friendUnit.onHandCards
+        if (card.type and "defence" not in card.effects)
+    )
+    enemyLevel = sum(
+        card.level
+        for card in enemyUnit.onHandCards
+        if (card.type and "defence" not in card.effects)
+    )
 
-    friendCardInfo = cardInfoSurface(friendUnit, type=True, color=(gSet['--font-color-yellow'] if friendLevel > enemyLevel else gSet['--font-color-grey']))
-    enemyCardInfo = cardInfoSurface(enemyUnit, type=True, color=(gSet['--font-color-yellow'] if friendLevel < enemyLevel else gSet['--font-color-grey']))
+    friendCardInfo = cardInfoSurface(
+        friendUnit,
+        type=True,
+        color=(
+            gSet["--font-color-yellow"]
+            if friendLevel > enemyLevel
+            else gSet["--font-color-grey"]
+        ),
+    )
+    enemyCardInfo = cardInfoSurface(
+        enemyUnit,
+        type=True,
+        color=(
+            gSet["--font-color-yellow"]
+            if friendLevel < enemyLevel
+            else gSet["--font-color-grey"]
+        ),
+    )
 
-    posY = max(min(friendUnit.img.y - friendCardInfo.get_height() - 10, enemyUnit.img.y - enemyCardInfo.get_height() - 10), 100) # ensure the card info is the same high (maybe more beautiful)
+    posY = max(
+        min(
+            friendUnit.img.y - friendCardInfo.get_height() - 10,
+            enemyUnit.img.y - enemyCardInfo.get_height() - 10,
+        ),
+        100,
+    )  # ensure the card info is the same high (maybe more beautiful)
     friendCardInfoPos = (friendUnit.img.x - friendCardInfo.get_width() - 10, posY)
     enemyCardInfoPos = (enemyUnit.img.x + enemyUnit.img.width + 10, posY)
 
-    gSet['friendClashInfo'] = Img(img=friendCardInfo, size=friendCardInfo.size, pos=friendCardInfoPos, alpha=0)
-    gSet['enemyClashInfo'] = Img(img=enemyCardInfo, size=enemyCardInfo.size, pos=enemyCardInfoPos, alpha=0)
+    gSet["friendClashInfo"] = Img(
+        img=friendCardInfo, size=friendCardInfo.size, pos=friendCardInfoPos, alpha=0
+    )
+    gSet["enemyClashInfo"] = Img(
+        img=enemyCardInfo, size=enemyCardInfo.size, pos=enemyCardInfoPos, alpha=0
+    )
 
-    Animations.append(moveAnimation(object=gSet['friendClashInfo'], animateSeconds=0.2, nowPos=(gSet['friendClashInfo'].x - 100, gSet['friendClashInfo'].y), endPos=gSet['friendClashInfo'].pos, name="friendClash4InfoFadeIn"))
-    Animations.append(moveAnimation(object=gSet['enemyClashInfo'], animateSeconds=0.2, nowPos=(gSet['enemyClashInfo'].x + 50, gSet['enemyClashInfo'].y), endPos=(gSet['enemyClashInfo'].x - 50, gSet['enemyClashInfo'].y), name="enemyClash4InfoFadeIn"))
+    Animations.append(
+        moveAnimation(
+            object=gSet["friendClashInfo"],
+            animateSeconds=0.2,
+            nowPos=(gSet["friendClashInfo"].x - 100, gSet["friendClashInfo"].y),
+            endPos=gSet["friendClashInfo"].pos,
+            name="friendClash4InfoFadeIn",
+        )
+    )
+    Animations.append(
+        moveAnimation(
+            object=gSet["enemyClashInfo"],
+            animateSeconds=0.2,
+            nowPos=(gSet["enemyClashInfo"].x + 50, gSet["enemyClashInfo"].y),
+            endPos=(gSet["enemyClashInfo"].x - 50, gSet["enemyClashInfo"].y),
+            name="enemyClash4InfoFadeIn",
+        )
+    )
 
-    Animations.append(fadeAnimation(object=gSet['friendClashInfo'], animateSeconds=0.1, nowAlpha=0, endAlpha=255, name="friendClash2InfoFadeIn"))
-    Animations.append(fadeAnimation(object=gSet['enemyClashInfo'], animateSeconds=0.1, nowAlpha=0, endAlpha=255, name="enemyClash2InfoFadeIn"))
+    Animations.append(
+        fadeAnimation(
+            object=gSet["friendClashInfo"],
+            animateSeconds=0.1,
+            nowAlpha=0,
+            endAlpha=255,
+            name="friendClash2InfoFadeIn",
+        )
+    )
+    Animations.append(
+        fadeAnimation(
+            object=gSet["enemyClashInfo"],
+            animateSeconds=0.1,
+            nowAlpha=0,
+            endAlpha=255,
+            name="enemyClash2InfoFadeIn",
+        )
+    )
 
     if friendLevel == enemyLevel:
         pass
@@ -146,13 +267,27 @@ def clashState2(Animations:list, friendUnit:Character, enemyUnit:Character):
         friendUnit.HPlossThisTurn += damage
     else:
         damage = friendLevel - enemyLevel
-        defence = sum(card.level for card in enemyUnit.onHandCards if (card.type and "defence" in card.effects))
-        if damage > 0 and damage - defence <= 0 and sum(1 for card in enemyUnit.onHandCards if (card.type and "hasCounterAttack" in card.effects)) > 0:
-            gSet['enemyUseSpecial'].append("counterAttack")
+        defence = sum(
+            card.level
+            for card in enemyUnit.onHandCards
+            if (card.type and "defence" in card.effects)
+        )
+        if (
+            damage > 0
+            and damage - defence <= 0
+            and sum(
+                1
+                for card in enemyUnit.onHandCards
+                if (card.type and "hasCounterAttack" in card.effects)
+            )
+            > 0
+        ):
+            gSet["enemyUseSpecial"].append("counterAttack")
         else:
             enemyUnit.HPlossThisTurn += damage
 
-def clashState3(Animations:list, friendUnit:Character, enemyUnit:Character):
+
+def clashState3(Animations: list, friendUnit: Character, enemyUnit: Character):
     """
     Have a break
     """
@@ -161,7 +296,8 @@ def clashState3(Animations:list, friendUnit:Character, enemyUnit:Character):
     enemyUnit.showImg = enemyUnit.img
     Animations.append(Sleep(seconds=0.3, name="Clash3"))
 
-def clashState4(Animations:list, friendUnit:Character, enemyUnit:Character):
+
+def clashState4(Animations: list, friendUnit: Character, enemyUnit: Character):
     """
     Calculate the yin level
     """
@@ -172,24 +308,90 @@ def clashState4(Animations:list, friendUnit:Character, enemyUnit:Character):
     done = 0
     friendUnit.showImg = friendUnit.imgAttackYin
     enemyUnit.showImg = enemyUnit.imgAttackYin
-    friendLevel = sum(card.level for card in friendUnit.onHandCards if (not card.type and "defence" not in card.effects))
-    enemyLevel = sum(card.level for card in enemyUnit.onHandCards if (not card.type and "defence" not in card.effects))
+    friendLevel = sum(
+        card.level
+        for card in friendUnit.onHandCards
+        if (not card.type and "defence" not in card.effects)
+    )
+    enemyLevel = sum(
+        card.level
+        for card in enemyUnit.onHandCards
+        if (not card.type and "defence" not in card.effects)
+    )
 
-    friendCardInfo = cardInfoSurface(friendUnit, type=False, color=(gSet['--font-color-yellow'] if friendLevel > enemyLevel else gSet['--font-color-grey']))
-    enemyCardInfo = cardInfoSurface(enemyUnit, type=False, color=(gSet['--font-color-yellow'] if friendLevel < enemyLevel else gSet['--font-color-grey']))
+    friendCardInfo = cardInfoSurface(
+        friendUnit,
+        type=False,
+        color=(
+            gSet["--font-color-yellow"]
+            if friendLevel > enemyLevel
+            else gSet["--font-color-grey"]
+        ),
+    )
+    enemyCardInfo = cardInfoSurface(
+        enemyUnit,
+        type=False,
+        color=(
+            gSet["--font-color-yellow"]
+            if friendLevel < enemyLevel
+            else gSet["--font-color-grey"]
+        ),
+    )
 
-    posY = max(min(friendUnit.img.y - friendCardInfo.get_height() - 10, enemyUnit.img.y - enemyCardInfo.get_height() - 10), 100) # ensure the card info is the same high (maybe more beautiful)
+    posY = max(
+        min(
+            friendUnit.img.y - friendCardInfo.get_height() - 10,
+            enemyUnit.img.y - enemyCardInfo.get_height() - 10,
+        ),
+        100,
+    )  # ensure the card info is the same high (maybe more beautiful)
     friendCardInfoPos = (friendUnit.img.x - friendCardInfo.get_width() - 10, posY)
     enemyCardInfoPos = (enemyUnit.img.x + enemyUnit.img.width + 10, posY)
 
-    gSet['friendClashInfo'] = Img(img=friendCardInfo, size=friendCardInfo.size, pos=friendCardInfoPos, alpha=0)
-    gSet['enemyClashInfo'] = Img(img=enemyCardInfo, size=enemyCardInfo.size, pos=enemyCardInfoPos, alpha=0)
+    gSet["friendClashInfo"] = Img(
+        img=friendCardInfo, size=friendCardInfo.size, pos=friendCardInfoPos, alpha=0
+    )
+    gSet["enemyClashInfo"] = Img(
+        img=enemyCardInfo, size=enemyCardInfo.size, pos=enemyCardInfoPos, alpha=0
+    )
 
-    Animations.append(moveAnimation(object=gSet['friendClashInfo'], animateSeconds=0.2, nowPos=(gSet['friendClashInfo'].x - 100, gSet['friendClashInfo'].y), endPos=gSet['friendClashInfo'].pos, name="friendClash4InfoFadeIn"))
-    Animations.append(moveAnimation(object=gSet['enemyClashInfo'], animateSeconds=0.2, nowPos=(gSet['enemyClashInfo'].x + 50, gSet['enemyClashInfo'].y), endPos=(gSet['enemyClashInfo'].x - 50, gSet['enemyClashInfo'].y), name="enemyClash4InfoFadeIn"))
+    Animations.append(
+        moveAnimation(
+            object=gSet["friendClashInfo"],
+            animateSeconds=0.2,
+            nowPos=(gSet["friendClashInfo"].x - 100, gSet["friendClashInfo"].y),
+            endPos=gSet["friendClashInfo"].pos,
+            name="friendClash4InfoFadeIn",
+        )
+    )
+    Animations.append(
+        moveAnimation(
+            object=gSet["enemyClashInfo"],
+            animateSeconds=0.2,
+            nowPos=(gSet["enemyClashInfo"].x + 50, gSet["enemyClashInfo"].y),
+            endPos=(gSet["enemyClashInfo"].x - 50, gSet["enemyClashInfo"].y),
+            name="enemyClash4InfoFadeIn",
+        )
+    )
 
-    Animations.append(fadeAnimation(object=gSet['friendClashInfo'], animateSeconds=0.2, nowAlpha=0, endAlpha=255, name="friendClash4InfoFadeIn"))
-    Animations.append(fadeAnimation(object=gSet['enemyClashInfo'], animateSeconds=0.2, nowAlpha=0, endAlpha=255, name="enemyClash4InfoFadeIn"))
+    Animations.append(
+        fadeAnimation(
+            object=gSet["friendClashInfo"],
+            animateSeconds=0.2,
+            nowAlpha=0,
+            endAlpha=255,
+            name="friendClash4InfoFadeIn",
+        )
+    )
+    Animations.append(
+        fadeAnimation(
+            object=gSet["enemyClashInfo"],
+            animateSeconds=0.2,
+            nowAlpha=0,
+            endAlpha=255,
+            name="enemyClash4InfoFadeIn",
+        )
+    )
 
     if friendLevel == enemyLevel:
         pass
@@ -198,13 +400,27 @@ def clashState4(Animations:list, friendUnit:Character, enemyUnit:Character):
         friendUnit.HPlossThisTurn += damage
     else:
         damage = friendLevel - enemyLevel
-        defence = sum(card.level for card in enemyUnit.onHandCards if (not card.type and "defence" in card.effects))
-        if damage > 0 and damage - defence <= 0 and sum(1 for card in enemyUnit.onHandCards if (not card.type and "hasCounterAttack" in card.effects)) > 0:
-            gSet['enemyUseSpecial'].append("counterAttack")
+        defence = sum(
+            card.level
+            for card in enemyUnit.onHandCards
+            if (not card.type and "defence" in card.effects)
+        )
+        if (
+            damage > 0
+            and damage - defence <= 0
+            and sum(
+                1
+                for card in enemyUnit.onHandCards
+                if (not card.type and "hasCounterAttack" in card.effects)
+            )
+            > 0
+        ):
+            gSet["enemyUseSpecial"].append("counterAttack")
         else:
             enemyUnit.HPlossThisTurn += damage
 
-def clashState5(Animations:list, friendUnit:Character, enemyUnit:Character):
+
+def clashState5(Animations: list, friendUnit: Character, enemyUnit: Character):
     """
     The characters returned to their original positions
     """
@@ -216,11 +432,35 @@ def clashState5(Animations:list, friendUnit:Character, enemyUnit:Character):
     enemyEndPos = enemyOriginPos
     friendUnit.showImg = friendUnit.img
     enemyUnit.showImg = enemyUnit.img
-    Animations.append(moveAnimation(object=friendUnit.img, animateSeconds=0.1, nowPos=friendUnit.img.pos, endPos=friendEndPos, name="FriendClash5"))
-    if '(boss)' in enemyUnit.name:
-        Animations.append(moveAnimation(object=enemyUnit.imgDash, animateSeconds=0.5, nowPos=enemyUnit.img.pos, endPos=enemyUnit.img.pos, name="EnemyClash5"))
+    Animations.append(
+        moveAnimation(
+            object=friendUnit.img,
+            animateSeconds=0.1,
+            nowPos=friendUnit.img.pos,
+            endPos=friendEndPos,
+            name="FriendClash5",
+        )
+    )
+    if "(boss)" in enemyUnit.name:
+        Animations.append(
+            moveAnimation(
+                object=enemyUnit.imgDash,
+                animateSeconds=0.5,
+                nowPos=enemyUnit.img.pos,
+                endPos=enemyUnit.img.pos,
+                name="EnemyClash5",
+            )
+        )
     else:
-        Animations.append(moveAnimation(object=enemyUnit.img, animateSeconds=0.1, nowPos=enemyUnit.img.pos, endPos=enemyEndPos, name="EnemyClash5"))
+        Animations.append(
+            moveAnimation(
+                object=enemyUnit.img,
+                animateSeconds=0.1,
+                nowPos=enemyUnit.img.pos,
+                endPos=enemyEndPos,
+                name="EnemyClash5",
+            )
+        )
     friendUnit.imgDash.setPos(friendEndPos)
     friendUnit.imgAttackYang.setPos(friendEndPos)
     friendUnit.imgAttackYin.setPos(friendEndPos)

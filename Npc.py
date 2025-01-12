@@ -1,7 +1,8 @@
 import pygame
 from GameSettings import *
 
-class Npc():
+
+class Npc:
     def __init__(self, name, imgpath, width, height, posX, posY):
 
         self.image = pygame.image.load(imgpath)
