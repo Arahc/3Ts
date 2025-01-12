@@ -1,7 +1,7 @@
 import sys
 from Img import Img
 from Character import Character, copyCharacter
-from Animation import Sleep, moveAnimation
+from Animation import Sleep, moveAnimation, fadeAnimation
 from mouseSelect import mouseLeftButton, mouseMove
 import pygame as pg
 import screenPainter as scpt
@@ -76,8 +76,9 @@ def mainInit():
     # fonts
     gSet['font-battleInfo'] = pg.font.Font("./assets/font/NotoSansCJKsc-Bold.otf", 20)
     gSet['font-cardDetail'] = pg.font.Font("./assets/font/STKAITI.TTF", 24)
-    gSet['font-clashInfo-card'] = pg.font.Font("./assets/font/SourceHanSansSC-Regular-2.otf", 20)
+    gSet['font-clashInfo-card'] = pg.font.Font("./assets/font/SourceHanSansSC-Regular-2.otf", 18)
     gSet['font-clashInfo-number'] = pg.font.Font("./assets/font/Exo-SemiBold.ttf", 32)
+    gSet['font-bossName'] = pg.font.Font("./assets/font/SourceHanSerifCN-Regular-1.otf", 80)
 
     # others
     gSet['cardSpace'] = 0
@@ -230,7 +231,8 @@ def cardInfoDeal(friendUnit:Character, enemyUnit:Character):
 
 Animations = []
 
-def main(Level:int = 1, FriendID:str = "fr1"):
+def main(Level:int = 0, FriendID:str = "fr1"):
+    pg.init()
     mainInit()
     
     pictureInit()
@@ -239,16 +241,30 @@ def main(Level:int = 1, FriendID:str = "fr1"):
     FriendUnit = copyCharacter(gSet['friendUnit'])
     EnemyUnit = copyCharacter(gSet['enemyUnit'])
 
+    bossEntrance = False
+
     global Animations
-    Animations.append(moveAnimation(object=FriendUnit.imgDash, animateSeconds=0.3, nowPos=(-FriendUnit.img.width, FriendUnit.img.y), endPos=(FriendUnit.img.x + (FriendUnit.img.width - FriendUnit.imgDash.width), FriendUnit.img.y), name="FriendUnitIn"))
-    Animations.append(moveAnimation(object=EnemyUnit.imgDash, animateSeconds=0.3, nowPos=(gSet['screenWidth'], EnemyUnit.img.y), endPos=EnemyUnit.img.pos, name="EnemyUnitIn"))
+    if "(boss)" in EnemyUnit.name:
+        bossName = EnemyUnit.name.removesuffix("(boss)")
+        bossEntranceSurface = pg.Surface((gSet['screenWidth'], gSet['screenHeight']))
+        bossEntranceSurface.fill((255, 255, 255))
+        bossNameText = gSet['font-bossName'].render(bossName, True, (0, 0, 0))
+        textRect = bossNameText.get_rect(center=(gSet['screenWidth'] // 2, gSet['screenHeight'] // 2))
+        bossEntranceSurface.blit(bossNameText, textRect.topleft)
+        bossEntrance = True
+        gSet['bossEntrance'] = Img(img=bossEntranceSurface, size=(gSet['screenWidth'], gSet['screenHeight']), pos=(0, 0), alpha=255)
+        Animations.append(fadeAnimation(object=gSet['bossEntrance'], animateSeconds=0.1, nowAlpha=0, endAlpha=255, name="bossEntranceFadeIn"))
+    else:
+        Animations.append(moveAnimation(object=FriendUnit.imgDash, animateSeconds=0.3, nowPos=(-FriendUnit.img.width, FriendUnit.img.y), endPos=(FriendUnit.img.x + (FriendUnit.img.width - FriendUnit.imgDash.width), FriendUnit.img.y), name="FriendUnitIn"))
+        Animations.append(moveAnimation(object=EnemyUnit.imgDash, animateSeconds=0.3, nowPos=(gSet['screenWidth'], EnemyUnit.img.y), endPos=EnemyUnit.img.pos, name="EnemyUnitIn"))
 
     recordTurnState(FriendUnit, EnemyUnit)
     clock = pg.time.Clock()
     clock.tick(gSet['fps'])
 
-    FriendUnit.showImg = FriendUnit.imgDash
-    EnemyUnit.showImg = EnemyUnit.imgDash
+    if "(boss)" not in EnemyUnit.name:
+        FriendUnit.showImg = FriendUnit.imgDash
+        EnemyUnit.showImg = EnemyUnit.imgDash
 
     inClash = False
     clashDoneThisFrame = False
@@ -318,6 +334,12 @@ def main(Level:int = 1, FriendID:str = "fr1"):
                 elif animation.name == "newEnemyUnitIn":
                     EnemyUnit.showImg = EnemyUnit.img
                     recordTurnState(FriendUnit, EnemyUnit)
+                elif animation.name == "bossEntranceFadeIn":
+                    Animations.append(Sleep(seconds=2.0, name="bossEntranceSleep"))
+                elif animation.name == "bossEntranceSleep":
+                    Animations.append(fadeAnimation(object=gSet['bossEntrance'], animateSeconds=1, nowAlpha=255, endAlpha=0, name="bossEntranceFadeOut"))
+                elif animation.name == "bossEntranceFadeOut":
+                    bossEntrance = False
 
         if clashDoneThisFrame:
             inClash = False
@@ -344,11 +366,8 @@ def main(Level:int = 1, FriendID:str = "fr1"):
             if event.type == pg.QUIT:
                 pg.quit()
                 sys.exit()
-            elif event.type == pg.KEYDOWN and pg.K_ESCAPE:
+            elif (event.type == pg.KEYDOWN) and (event.key == pg.K_ESCAPE):
                 return 'Lose'
-            # elif event.type == pg.VIDEORESIZE:
-            #     gSet['screenSize'] = gSet['screenWidth'], gSet['screenHeight'] = event.size[0], event.size[1]
-            #     gSet['screen'] = pg.display.set_mode(gSet['screenSize'])
             elif not inClash:
                 if event.type == pg.MOUSEMOTION:
                     mouseMove(event=event, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
@@ -370,7 +389,7 @@ def main(Level:int = 1, FriendID:str = "fr1"):
                         endTurn(friendUnit=FriendUnit, enemyUnit=EnemyUnit)
                         inClash = True
                         clashState1(Animations=Animations, friendUnit=FriendUnit, enemyUnit=EnemyUnit)
-            
+
         gSet['screen'].blit(gSet['background'].img, gSet['background'].pos)
         scpt.drawBattleInfo(friendUnit=FriendUnit, enemyUnit=EnemyUnit, enemyID=gSet['enemyUnitID'], enemyNumber=len(gSet['enemyUnits']))
         scpt.drawUnits(friend=FriendUnit.showImg, enemy=EnemyUnit.showImg)
@@ -381,6 +400,11 @@ def main(Level:int = 1, FriendID:str = "fr1"):
                 gSet['screen'].blit(gSet['friendClashInfo'].img, gSet['friendClashInfo'].pos)
             if gSet['enemyClashInfo'] is not None:
                 gSet['screen'].blit(gSet['enemyClashInfo'].img, gSet['enemyClashInfo'].pos)
+        if bossEntrance:
+            gSet['screen'].blit(gSet['bossEntrance'].img, gSet['bossEntrance'].pos)
 
         pg.display.flip()
         clock.tick(gSet['fps'])
+
+if __name__ == "__main__":
+    main(Level=2, FriendID="fr1")

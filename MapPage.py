@@ -221,15 +221,21 @@ class MapPage(Scene):
         #     return None
         if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_ESCAPE):
             return "EnterMenufromMap"
+        
+        # 判断是否进入商店
+        if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_b):
+            for npc in self.npcs:
+                if (self.player.Rect.colliderect(npc.imageRect)) and (npc.name == 'Cornifer'):
+                    return "EnterShop"
+        
         if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_e):
-
             # 判断是否进入对话
             if (self.touchDown()) and (not self.player.isDashing):
                 for npc in self.npcs:
                     if (self.player.Rect.colliderect(npc.imageRect)) and (npc.name == 'Seer'):
                         return ("EnterChat",npc.name)
                     elif (self.player.Rect.colliderect(npc.imageRect)) and (npc.name == 'Cornifer'):
-                        return "EnterShop"
+                        return ("EnterChat",npc.name)
             
             # 判断接触宝箱
             for i in range(self.maper.row):

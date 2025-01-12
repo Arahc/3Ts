@@ -8,6 +8,8 @@ from HelpPage import HelpPage
 from ShopPage import ShopPage
 import battleController
 import random
+import upgradeCharacter
+import difficultyController
 
 class GameManager():
 
@@ -24,8 +26,10 @@ class GameManager():
         self.map = [None for i in range(4)]
         for i in range(1,4):
             self.map[i] = MapPage(self.player, i)
-        self.chatboxes = { 'Seer': ChatBox.ChatBox('Seer') }
+        self.chatboxes = { 'Seer': ChatBox.ChatBox('Seer'), 'Cornifer': ChatBox.ChatBox('Cornifer') }
         self.shoppage = ShopPage(self.player)
+        upgradeCharacter.reset()
+        difficultyController.reset()
         listeners = [ self.menu ]
         events = []
         

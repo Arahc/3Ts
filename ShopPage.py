@@ -1,6 +1,7 @@
 import pygame, sys
 from GameSettings import *
 from Utility import Scene
+import upgradeCharacter
 
 class ShopPage(Scene):
 
@@ -28,27 +29,43 @@ class ShopPage(Scene):
         self.card_icon = pygame.transform.scale(self.card_icon, (60, 50))
         self.health_icon = pygame.image.load(r'.\assets\hp.png')
         self.health_icon = pygame.transform.scale(self.health_icon, (50, 70))
+        self.sp_icon = pygame.image.load(r'.\assets\sp.png')
+        self.sp_icon = pygame.transform.scale(self.sp_icon, (60, 60))
+        self.spheal_icon = pygame.image.load(r'.\assets\spheal.png')
+        self.spheal_icon = pygame.transform.scale(self.spheal_icon, (180, 60))
 
         # 定义商店界面文本
         self.store_text = self.font.render("商店", True, WHITE)
         self.store_rect = self.store_text.get_rect()
-        self.store_rect.center = (self.width // 2, self.shop_x + 50)
+        self.store_rect.center = (self.width // 2 + 30, self.shop_y + 50)
 
         # 定义商品价格文本
         self.card_price_text = self.font.render("20 吉欧", True, WHITE)
         self.card_price_rect = self.card_price_text.get_rect()
-        self.card_price_rect.center = (self.width // 2 + 100, self.shop_x + 180)
+        self.card_price_rect.center = (self.width // 2 + 100, self.shop_y + 120)
 
         self.health_price_text = self.font.render("25 吉欧", True, WHITE)
         self.health_price_rect = self.health_price_text.get_rect()
-        self.health_price_rect.center = (self.width // 2 + 100, self.shop_x + 280)
+        self.health_price_rect.center = (self.width // 2 + 100, self.shop_y + 200)
+
+        self.sp_price_text = self.font.render("30 吉欧", True, WHITE)
+        self.sp_price_rect = self.sp_price_text.get_rect()
+        self.sp_price_rect.center = (self.width // 2 + 100, self.shop_y + 280)
+
+        self.spheal_price_text = self.font.render("50 吉欧", True, WHITE)
+        self.spheal_price_rect = self.spheal_price_text.get_rect()
+        self.spheal_price_rect.center = (self.width // 2 + 100, self.shop_y + 360)
 
         window.blit(self.shop_surface, (self.shop_x, self.shop_y))
         window.blit(self.store_text, self.store_rect)
-        window.blit(self.card_icon, (self.width // 2 - 100, self.shop_x + 150))
+        window.blit(self.card_icon, (self.width // 2 - 100, self.shop_y + 90))
         window.blit(self.card_price_text, self.card_price_rect)
-        window.blit(self.health_icon, (self.width // 2 - 100, self.shop_x + 250))
+        window.blit(self.health_icon, (self.width // 2 - 100, self.shop_y + 170))
         window.blit(self.health_price_text, self.health_price_rect)
+        window.blit(self.sp_icon, (self.width // 2 - 100, self.shop_y + 250))
+        window.blit(self.sp_price_text, self.sp_price_rect)
+        window.blit(self.spheal_icon, (self.width // 2 - 150, self.shop_y + 330))
+        window.blit(self.spheal_price_text, self.spheal_price_rect)
         tim = pygame.time.get_ticks()
         if (tim - self.buytime < 500):
             window.blit(self.tip_text, self.tip_rect)
@@ -56,10 +73,10 @@ class ShopPage(Scene):
     def handle(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # 鼠标左键点击
             self.card_icon_rect = self.card_icon.get_rect()
-            self.card_icon_rect.topleft = (self.width // 2 - 100, self.shop_x + 150)
+            self.card_icon_rect.topleft = (self.width // 2 - 100, self.shop_y + 150)
 
             self.health_icon_rect = self.health_icon.get_rect()
-            self.health_icon_rect.topleft = (self.width // 2 - 100, self.shop_x + 250)
+            self.health_icon_rect.topleft = (self.width // 2 - 100, self.shop_y + 250)
 
             mouse_pos = event.pos
             if self.card_icon_rect.collidepoint(mouse_pos) or self.card_price_rect.collidepoint(mouse_pos):
@@ -67,7 +84,7 @@ class ShopPage(Scene):
                 # 点击升级卡牌
                 if self.player.money >= 20:
                     self.player.money -= 20
-                    self.player.card_level += 1
+                    upgradeCharacter.addAllCardLevel(1)
                     self.tip_text = self.font.render("购买成功", True, WHITE)
                 else:
                     self.tip_text = self.font.render("吉欧不足", True, WHITE)
@@ -76,7 +93,25 @@ class ShopPage(Scene):
                 # 点击提升血量上限
                 if self.player.money >= 25:
                     self.player.money -= 25
-                    self.player.hp += 10
+                    upgradeCharacter.addMaxHP(10)
+                    self.tip_text = self.font.render("购买成功", True, WHITE)
+                else:
+                    self.tip_text = self.font.render("吉欧不足", True, WHITE)
+            elif self.sp_icon.get_rect().collidepoint(mouse_pos) or self.sp_price_rect.collidepoint(mouse_pos):
+                self.buytime = pygame.time.get_ticks()
+                # 点击提升精力上限
+                if self.player.money >= 30:
+                    self.player.money -= 30
+                    upgradeCharacter.addMaxSP(2)
+                    self.tip_text = self.font.render("购买成功", True, WHITE)
+                else:
+                    self.tip_text = self.font.render("吉欧不足", True, WHITE)
+            elif self.spheal_icon.get_rect().collidepoint(mouse_pos) or self.spheal_price_rect.collidepoint(mouse_pos):
+                self.buytime = pygame.time.get_ticks()
+                # 点击增加精力恢复速度
+                if self.player.money >= 50:
+                    self.player.money -= 50
+                    upgradeCharacter.addSPHeal(1)
                     self.tip_text = self.font.render("购买成功", True, WHITE)
                 else:
                     self.tip_text = self.font.render("吉欧不足", True, WHITE)
