@@ -6,7 +6,7 @@
             "ID": "en1-1",
             "name": "尖刀卫兵",
             "type": "normal",
-            "HP": 16,
+            "HP": 20,
             "maxHP": 20,
             "SP": 100,
             "SPHeal": 100,
